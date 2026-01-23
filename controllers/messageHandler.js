@@ -29,6 +29,8 @@ module.exports = (bot) => {
     if (msg.voice) return bot.sendMessage(chatId, "You sound like a broken toy Just type.");
     if (!msg.text) return;
 
+        if(msg.chat.type !== 'private') return;
+        
         const pending = {
             msgId: msg.message_id,
             userId: msg.chat.id,
