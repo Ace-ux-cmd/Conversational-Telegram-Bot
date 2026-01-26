@@ -17,10 +17,7 @@ module.exports = (bot) => {
     };
 
     bot.on("message", async (msg) => {
-       
-        // Ignore commands
-
-        if(msg.text.includes("/")) return;
+     const chatId = msg.chat.id;
         
         // ✅ Handle different media types
     if (msg.sticker) return bot.sendMessage(chatId, "A sticker huh? Try using an emoji instead 🥲");
@@ -29,16 +26,47 @@ module.exports = (bot) => {
     if (msg.voice) return bot.sendMessage(chatId, "You sound like a broken toy Just type.");
     if (!msg.text) return;
 
-        //Restrict message handling to private chats only
-        if(msg.chat.type !== 'private') return;
+        // Ignore commands
+        if(msg.text.includes("/")) return;
         
         const pending = {
             msgId: msg.message_id,
-            userId: msg.chat.id,
+            chatId: chatId,
+            userId: msg.from.id,
             username: msg.from.first_name,
-            message: msg.text
+            message: msg.text,
+            chatType: msg.chat.type,
         };
+        
+        
+        // Create "replied_to_message" for groups and supergroups
+if (msg.chat.type !== 'private' && msg.chat.type !== 'channel') {
+    const reply = msg.reply_to_message;
+    const text =  msg.text.toLowerCase();
+    const botTag = '@kathill';
+    
 
+    if (reply) {
+
+        // Track if the bot itself is being replied to
+        if (reply.from.username === 'kathill') {
+            pending.botName = 'kathill';
+        }
+
+        // If it's a reply to the bot OR the bot is tagged
+        if (reply.from.username === 'kathill' || text.includes(botTag)) {
+            pending.replied_message = reply.text || reply.caption || "";
+        }else{
+            return
+        }
+    } else {
+        /* If no reply, ONLY proceed if mentioned OR the bot is tagged
+        Prevent reply if neither condition is met*/ 
+        if (!text.includes('Katelyn') && !text.includes(botTag)) {
+            return;
+        }
+    }
+}
         // Queue priority
         pending.userId == process.env.BOT_OWNER_ID ? queue.unshift(pending) : queue.push(pending);
 
