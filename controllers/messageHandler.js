@@ -62,7 +62,7 @@ if (msg.chat.type !== 'private' && msg.chat.type !== 'channel') {
     } else {
         /* If no reply, ONLY proceed if mentioned OR the bot is tagged
         Prevent reply if neither condition is met*/ 
-        if (!text.includes('Katelyn') && !text.includes(botTag)) {
+        if (!text.includes('katelyn') && !text.includes(botTag)) {
             return;
         }
     }
