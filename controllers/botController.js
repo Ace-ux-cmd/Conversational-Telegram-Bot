@@ -20,7 +20,11 @@ async function processUserRequest(bot, currentUser) {
             reply_to_message_id: currentUser.msgId 
         });
     } else {
-        bot.sendMessage(currentUser.chatId, "Currently busy rn, TTYL", { 
+        bot.sendMessage(currentUser.chatId, `Sorry, i’m slammed with work and school and have no time left for chats this month😩🫩. Anyways, don’t bother replying to this, i’ll be back at the start of next month.
+        If not, message my admin. Keep it chill till then 
+  
+PS:  
+This is just an automated message btw`, { 
             reply_to_message_id: currentUser.msgId 
         });
     }
