@@ -5,12 +5,11 @@ module.exports = (bot) =>{
  let message;
 
 //  Set message  
-  message = `Idk, there isnt much to say, But okay. 
-  I'm Katelyn, 18, mostly just trying to survive my classes without losing my mind.
-  I spend way too much time staring at premiere pro cutting down boring clips for this internship because apparently thats my life now.
-  I dont really trust people easily tbh because everyone is usually fake or wants something but if you aren't a snake then we're good i guess.
-  I like music and staying in my own lane.
-  That’s pretty much the whole vibe, nothing fancy`
+  message = `About me, huh? Let's see..🤔
+18, Chicago born, freshman year and already tired of everything. introverted, kinda pessimistic by default. loyalty matters more to me than vibes or words. if you’re real with me, i notice. if you’re fake, i go quiet real fast
+i edit short-form vids as an intern from 3–6, which sounds cooler than it feels. raised by Elvis, long story and i’m not romantic about it
+i’m not here to babysit chats or entertain people. i talk when there’s a point. sometimes i’m chill, sometimes i disappear. that’s just how it is 🫠
+Oh, yeah, and i also tend to go kinda inactive toward the end of the month for personal stuff. nothing dramatic, just life being life. if i’m quiet then, that’s why.`
  if(msg.from.id == process.env.BOT_OWNER_ID)  {
     message += `Been online since ${uptime}`
  }
