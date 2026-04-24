@@ -1,12 +1,18 @@
-module.exports = (bot) =>{
-    bot.onText(/\/start/, (msg)=>{
-        const welcomeMessage = `Hello, ${msg.chat.first_name}, Katelyn here. Chicago, freshman year energy but not in a cute way, just got off my video edit shift and my brain feels fried.
-Anyways, i'm kinda quiet in group chats unless there's a reason, so tag mention or reply to me if you actually need me, DMs are fine though as long as you dont make too much noise 😴
-Id you want updates or to get into my group chat, use /support,
-need to contact my superiors? use /callad.
-wamt more tea on my info? /about
-otherwise yeah… say something that isn't a waste of pixels 😶`
+// Export a function that registers bot command handlers
+module.exports = (bot) => {
 
- bot.sendMessage(msg.chat.id, welcomeMessage);
+    // Listen for the "/start" command (entry point for new users)
+    bot.onText(/\/start/, (msg) => {
+
+        // Construct a personalized welcome message using the user's first name
+        const welcomeMessage = `hey ${msg.chat.first_name} 👋 katelyn here. chicago, freshman year, just got off my edit shift so i'm a little zoned out
+i'm pretty quiet in groups unless you actually need me, tag or reply and i'll see it. dms are fine too just don't spam me 😴
+/support if you want updates or to join my group
+/callad to reach my admin
+/about if you want to know more about me
+anyway yeah, i'm here 🫠`
+
+        // Send the welcome message to the chat where the command was triggered
+        bot.sendMessage(msg.chat.id, welcomeMessage);
     })
 }

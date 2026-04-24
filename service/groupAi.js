@@ -1,43 +1,98 @@
-const { OpenAI } = require("openai");
+// Import Gemini AI SDK
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// Import system instruction config (persona + admin mode)
 const { defaultConfig, adminConfig } = require("../config/instruction");
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
+/**
+ * Generates AI response for group chat context
+ * Handles reply context + message formatting for conversational continuity
+ */
 async function aiGroupResponse(currentUser) {
 
-
-    // Setup system instructions locally
-    let system = defaultConfig;
-    if (currentUser.userId == process.env.BOT_OWNER_ID) system += ` ${adminConfig}`;
-
-    //  Format the current message into the "messages" format the AI expects
-    // Since there's no DB unlike in private, we just process the current input
-    const currentMessages = [
-        { role: "user", content: currentUser.message }
+    // Pool of API keys for request distribution / fallback
+    const apiKeys = [
+        process.env.GOOGLE_API_KEY1,
+        process.env.GOOGLE_API_KEY7,
+        process.env.GOOGLE_API_KEY8,
+        process.env.GOOGLE_API_KEY9,
+        process.env.GOOGLE_API_KEY0
     ];
 
+    // Base system prompt defining bot personality
+    let system = defaultConfig;
 
-// Identify the sender of each replied message by assigning roles.
-    if(currentUser.replied_message) {
-    let role = currentUser.botName == 'kathill_bot' ? 'assistant' : 'user'
-        currentMessages.unshift ({ role: role, content: currentUser.replied_message })
+    // Elevated behavior for bot owner
+    if (currentUser.userId == process.env.BOT_OWNER_ID) {
+        system += ` ${adminConfig}`;
     }
 
-        // Fallback Logic: GPT-4o-mini
-        try {
-            const responses = await openai.responses.create({
-                model: "gpt-4o-mini",
-                instructions: system,
-                input: currentMessages, 
-                max_output_tokens: 200
-            });
-            return responses.output_text;
-            
-        } catch (err) {
-            console.error("AI Service Error:", err);
-            return null; 
+    // Random key selection for load balancing
+    const randomKey = apiKeys[Math.floor(Math.random() * apiKeys.length)];
+
+    // Initialize Gemini client
+    const genAI = new GoogleGenerativeAI(randomKey);
+
+    // Configure model with system instruction + runtime context
+    const model = genAI.getGenerativeModel({
+        model: "gemini-2.5-flash-lite",
+        systemInstruction: `${system}. User's name: ${currentUser.username}. Time: ${(new Date()).toLocaleString()}.`
+    });
+
+    /**
+     * Format current user message into Gemini chat structure
+     */
+    const currentMessages = [
+        {
+            role: "user",
+            parts: [{ text: currentUser.message }]
         }
+    ];
+
+    /**
+     * If message is a reply in a group,
+     * prepend context of the original message being replied to
+     */
+    if (currentUser.replied_message) {
+        currentMessages.unshift({
+            role: 'user',
+            parts: [{
+                text: `[Context - replied to message]: "${currentUser.replied_message}"`
+            }]
+        });
     }
 
-// Export the function
+    try {
+
+        // Start chat session using previous messages as history (excluding latest)
+        const chat = model.startChat({
+            history: currentMessages.slice(0, -1)
+        });
+
+        // Extract last user message to send as prompt
+        const lastMessage =
+            currentMessages[currentMessages.length - 1].parts[0].text;
+
+        // Send message to model and wait for response
+        const responses = await chat.sendMessage(lastMessage);
+
+        // Return AI-generated text response
+        return responses.response.text();
+
+    } catch (err) {
+
+        // Log error for debugging purposes
+        console.error("AI Service Error:", err);
+
+        // Handle rate limiting
+        if (err.status === 429) {
+            return "Slow down with the messages, would you?";
+        }
+
+        // Generic failure fallback
+        return null;
+    }
+}
+
+// Export group AI response handler
 module.exports = { aiGroupResponse };

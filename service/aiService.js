@@ -1,62 +1,95 @@
-const { OpenAI } = require("openai");
+// Import Gemini AI SDK
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// Import system prompts (persona + admin mode)
 const { defaultConfig, adminConfig } = require("../config/instruction");
+
+// Import user memory handler (DB fetch/create)
 const getUser = require("../controllers/authController");
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+/**
+ * Generates AI response for a private user conversation
+ * Maintains context using stored message history in MongoDB
+ */
 async function getAIResponse(currentUser) {
+
+    // List of API keys for load balancing / fallback rotation
+    const apiKeys = [
+        process.env.GOOGLE_API_KEY1,
+        process.env.GOOGLE_API_KEY7,
+        process.env.GOOGLE_API_KEY8,
+        process.env.GOOGLE_API_KEY9,
+        process.env.GOOGLE_API_KEY0
+    ];
+
+    // Randomly select an API key to distribute request load
+    const randomKey = apiKeys[Math.floor(Math.random() * apiKeys.length)];
+
+    // Initialize Gemini client with selected key
+    const genAI = new GoogleGenerativeAI(randomKey);
+
+    // Base system instruction (persona definition)
     let system = defaultConfig;
-    if (currentUser.userId == process.env.BOT_OWNER_ID) system += ` ${adminConfig}`;
 
+    // Apply elevated admin behavior if request comes from bot owner
+    if (currentUser.userId == process.env.BOT_OWNER_ID) {
+        system += ` ${adminConfig}`;
+    }
+
+    // Configure model with system instruction and runtime context
+    const model = genAI.getGenerativeModel({
+        model: "gemini-2.5-flash-lite",
+        systemInstruction: `${system}. User's name: ${currentUser.username}. Time: ${(new Date()).toLocaleString()}.`
+    });
+
+    // Load or create user memory record
     const user = await getUser(currentUser.userId, currentUser.username);
-    
-    // Add new message
-    user.messages.push({ role: "user", content: currentUser.message });
 
-    // Keep the last 5 in the DB (Database Management)
-    // We use slice here so user.messages stays exactly 5 items long
-    user.messages = user.messages.slice(-5);
-    
+    // Append latest user message to conversation history
+    user.messages.push({
+        role: "user",
+        parts: [{ text: currentUser.message }]
+    });
+
+    // Keep only last 10 messages to limit context size
+    user.messages = user.messages.slice(-10);
+
     try {
-        // Primary attempt: Send all 5 messages to gpt-5-nano
-        const responses = await openai.responses.create({
-            model: "gpt-5-nano",
-            instructions: `${system}. User name: ${currentUser.username}. Time: ${(new Date()).toLocaleString()}.`,
-            input: user.messages, 
-            temperature: 1.3,
-            reasoning: { effort: "minimal" }
+
+        // Generate AI response using full conversation context
+        const result = await model.generateContent({
+            contents: user.messages
         });
-        const aiResponse = responses.output_text;
-        user.messages.push({ role: "assistant", content: aiResponse });
-        
-        // Final trim to ensure we don't save more than 5 after AI replies
-        user.messages = user.messages.slice(-5);
+
+        // Extract response text from Gemini output
+        const aiResponse = result.response.text();
+
+        // Store AI response in conversation history
+        user.messages.push({
+            role: "model",
+            parts: [{ text: aiResponse }]
+        });
+
+        // Maintain rolling context window
+        user.messages = user.messages.slice(-10);
+
+        // Persist updated history to database
         await user.save();
+
         return aiResponse;
 
     } catch (e) {
-        // Fallback Logic: GPT-4o-mini
-        try {
-            const responses = await openai.responses.create({
-                model: "gpt-4o-mini",
-                instructions: system,
-                /* Only send the 2 most recent messages (AI Context Management)
-                 This does NOT change the 5 messages stored in user.messages*/
-                input: user.messages.slice(-2), 
-                max_output_tokens: 200
-            });
-            const aiResponse = responses.output_text;
-            user.messages.push({ role: "assistant", content: aiResponse });
-            
-            // Final trim before saving to DB
-            user.messages = user.messages.slice(-5);
-            await user.save();
-            return aiResponse;
-            
-        } catch (err) {
-            console.error("AI Service Error:", err);
-            return null; 
-        }
+
+        // Log failure for debugging
+        console.error("AI Service Error:", e.message);
+
+        // Rate-limit handling
+        if (e.status === 429) return "Slow down with the messages, would you?";
+
+        // Generic failure fallback
+        return null;
     }
 }
 
+// Export AI service function
 module.exports = { getAIResponse };

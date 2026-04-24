@@ -1,87 +1,175 @@
-﻿# Conversational Telegram Bot
-Katelyn is a personality-driven Telegram chatbot built with Node.js and the OpenAI Responses API.
-She is conversational, opinionated, and intentionally not a service-style bot.
-This project focuses on natural conversational rhythm, lightweight context handling, and strong character consistency rather than long-term memory or command-heavy interactions.
+﻿````md
+# Conversational Telegram Bot (Katelyn)
 
-**Visit Bot Profile >>>>>** *https://t.me/kathill_bot*
+Katelyn is a personality-driven Telegram chatbot built with Node.js and the Google Gemini API.  
+She is designed to simulate natural human conversation with a strong character identity rather than behaving like a utility or assistant bot.
 
-# Features
-- Sharp, human-adjacent conversation style.
-- Lightweight rolling context (previous bot response + current user message).
-- Queue-based request handling to avoid API rate limits.
-- Simulated typing delay for natural pacing.
-- Distinct personality and behavioral boundaries.
-- Fallback API to handle rate limits.
-- Mongodb user storage to handle memory.
+The system focuses on:
+- Controlled conversational flow via queue processing
+- Persistent user memory using MongoDB
+- Group-chat awareness with minimal context injection
+- Persona consistency through structured system prompts
+- Rate-limit handling with multi-key API rotation
 
-# Tech Stack
+**Bot Profile:** https://t.me/kathill_bot
+
+---
+
+# 🧩 What Changed (Patch Overview)
+
+## 🔄 AI Backend Migration
+- Migrated from OpenAI Responses API → Google Generative AI (Gemini 2.5 Flash Lite)
+- Introduced multi-API key rotation for load distribution and quota handling
+- Switched to systemInstruction-based personality control
+
+## 🧠 Memory System Upgrade
+- Added MongoDB-backed user memory store
+- Each user maintains a rolling message history (last 10 messages)
+- Context persists across sessions (private chats only)
+
+## 🧵 Conversation Engine Rewrite
+- Separate pipelines for:
+  - Private chats (persistent memory + DB history)
+  - Group chats (stateless + reply/mention context only)
+- Reply-context injection added for group messages
+
+## ⚙️ Queue System Improvements
+- Single-threaded message queue processing
+- Prevents race conditions and API overload
+- Retry handling with delayed re-queue (15 min cooldown for repeated failures)
+- Priority queueing for bot owner messages
+
+## ⌨️ UX & Interaction Layer
+- Typing indicator simulation (`sendChatAction`)
+- Randomized response delay (5–10 seconds)
+- Media filtering (sticker, image, video, voice handling)
+- Command system:
+  - `/start`
+  - `/about`
+  - `/support`
+  - `/callad`
+
+## 🌐 Infrastructure Changes
+- Express server added for health check endpoint
+- Self-pinging system to prevent hosting sleep (Render)
+- Dynamic command loader from `/cmd` directory
+
+---
+
+# 🚀 Features
+
+- Strong fixed personality system (Katelyn persona prompt)
+- Human-like response timing simulation
+- Queue-based request pipeline
+- Persistent user memory (MongoDB)
+- Group chat awareness (mention/reply triggers only)
+- Multi-key Gemini API rotation
+- Retry + fallback handling for AI failures
+- Lightweight Express uptime server
+- Modular command structure
+
+---
+
+# 🧱 Tech Stack
 
 - Node.js
 - node-telegram-bot-api
-- OpenAI Responses API
-- dotenv.
+- Express.js
+- MongoDB (Mongoose)
+- Google Generative AI (Gemini 2.5 Flash Lite)
+- dotenv
+- node-fetch
 
-# Setup
-1. Clone the repository
-2. Install dependencies
-```
+---
+
+# ⚙️ Setup
+
+## 1. Clone repository
+```bash
+git clone <repo-url>
+cd <project-folder>
+````
+
+## 2. Install dependencies
+
+```bash
 npm install
-
 ```
-3. Create a .env file with:
-- BOT_API_KEY
-- OPENAI_API_KEY
-- BOT_OWNER_ID
-- BOT_URL(For self-ping)
-- MONGODB_URL
 
-4. Run the bot
+## 3. Create `.env` file
+
+```env
+BOT_API_KEY=
+GOOGLE_API_KEY1=
+GOOGLE_API_KEY7=
+GOOGLE_API_KEY8=
+GOOGLE_API_KEY9=
+GOOGLE_API_KEY0=
+
+BOT_OWNER_ID=
+BOT_URL=
+
+MONGODB_URL=
+PORT=
 ```
+
+## 4. Run the bot
+
+```bash
 node index.js
-
 ```
 
-# Notes:
-> This bot is intentionally stateless beyond lightweight rolling context.
-> Designed for direct chats and group interractions (Beta).
+---
 
-# 🧪 Group Chat Support (Beta)
+# 🧪 Group Chat Behavior (Updated)
 
-Katelyn now has limited group chat support.
+Katelyn responds in group chats only when:
 
-In group and supergroup chats, Katelyn will only respond when:
+* Mentioned (`@kathill`)
+* Name-triggered (e.g. “Katelyn”)
+* Replying to her message
 
-- she is mentioned by name (e.g. “Katelyn …”)
+### Group Mode Rules
 
-- she is tagged (@kathill_bot)
+* Stateless (no database memory in group context)
+* Only current message + optional replied message is used
+* No long-term context accumulation
 
-- a message is replied to, and Katelyn is either the author or explicitly tagged
+This is intentional to avoid noise and multi-user context pollution.
 
-**Group mode is intentionally stateless:**
+---
 
-- no database storage
+# 🧵 Queue Processing System
 
-- no long-term memory
+All messages (private + group) pass through a centralized queue system:
 
-- only the current message (and replied message, if applicable) is used as context.
-  
-> Group conversations are fast-moving and multi-user.
-Storing memory in this context increases confusion, cost, and risk, therefore group handling is deliberately stateless
+* Ensures single execution flow
+* Prevents race conditions
+* Controls API rate usage
+* Maintains message order
 
-# Queue-based message processing
+### Retry Logic
 
-Incoming messages(Both in groups/private) are processed through a single queue in order to:
-- Prevent race conditions
-- Reduce rate-limit/ Spamming issues
-- Preserve response order
+* Failed responses are retried up to 2 times
+* Repeated failures trigger 15-minute delayed re-queue
 
-> This feature is currently in beta and may change as behavior is refined and edge cases are handled.
+---
 
-*If any error is being encountered Kindly reach me on any of my social platforms below*
+# 🌐 System Notes
 
-# Author
+* Bot is intentionally not a utility assistant
+* Personality is enforced via system instructions
+* Memory limited to last 10 messages per user
+* Group chat handling is intentionally restricted and stateless
 
-Have questions? Want to support the project? Message me anytime at
-- https://wa.me/+2347054971517
+---
 
-- https://t.me/chidalumb100
+# 📌 Author / Contact
+
+* WhatsApp: [https://wa.me/+2347054971517]
+* Telegram: [https://t.me/chidalumb100]
+* Linkedln: [https://www.linkedin.com/in/chidalu-mbonu-94944b3ba]
+
+
+```
+```
