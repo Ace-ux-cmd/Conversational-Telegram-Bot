@@ -63,7 +63,7 @@ The system focuses on:
 - Queue-based request pipeline
 - Persistent user memory (MongoDB)
 - Group chat awareness (mention/reply triggers only)
-- Multi-key Gemini API rotation
+- Multi-key Gemini API rotation (Beta)
 - Retry + fallback handling for AI failures
 - Lightweight Express uptime server
 - Modular command structure
@@ -161,6 +161,7 @@ All messages (private + group) pass through a centralized queue system:
 * Personality is enforced via system instructions
 * Memory limited to last 10 messages per user
 * Group chat handling is intentionally restricted and stateless
+* Some features are still in testing phase
 
 ---
 
