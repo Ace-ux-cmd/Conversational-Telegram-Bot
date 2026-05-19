@@ -171,7 +171,9 @@ All messages (private + group) pass through a centralized queue system:
 * Telegram: [https://t.me/chidalumb100]
 * Linkedln: [https://www.linkedin.com/in/chidalu-mbonu-94944b3ba]
 
-# Warning
+---
+
+# ⚠️ Warning
 
 ** Multi-Key Gemini API Rotation (Beta)
 This feature enables request rotation across multiple Gemini API keys primarily to bypass rate-limiting. You may increase the number of API keys as you wish. However, you are advised to use with caution.
