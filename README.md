@@ -171,6 +171,19 @@ All messages (private + group) pass through a centralized queue system:
 * Telegram: [https://t.me/chidalumb100]
 * Linkedln: [https://www.linkedin.com/in/chidalu-mbonu-94944b3ba]
 
+# Warning
+
+** Multi-Key Gemini API Rotation (Beta)
+This feature enables request rotation across multiple Gemini API keys primarily to bypass rate-limiting. You may increase the number of API keys as you wish. However, you are advised to use with caution.
+Google may flag or temporarily restrict Google Cloud Console accounts that exhibit unusual API usage patterns, including high-frequency key rotation, distributed traffic behavior, or activity that may appear to circumvent quota or platform limitations. In some cases, affected accounts may receive automated warnings, verification requests, usage reviews, or console banners.
+
+To reduce risk:
+- Reduce the number of API keys used in code
+- Use only API keys and accounts you own or are authorized to manage
+- Keep request volumes within reasonable operational limits
+- Monitor quota usage, billing activity, and account status regularly
+- Follow Google’s published usage policies and terms
+- This feature is provided as an experimental beta capability and should be used responsibly in development and production environments.
 
 ```
 ```
