@@ -7,7 +7,7 @@ module.exports = (bot) => {
         // Send a message with inline buttons for contacting admins/support
         bot.sendMessage(
             msg.chat.id, // Target chat ID
-            "Got any problems?", // Prompt message
+            "Something on your mind?", // Prompt message
             {
                 // Reply to the user's original message for context
                 reply_to_message_id: msg.message_id,

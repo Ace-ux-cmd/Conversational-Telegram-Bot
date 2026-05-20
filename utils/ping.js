@@ -1,6 +1,3 @@
-// Import fetch for making HTTP requests (used for self-ping)
-const fetch = require("node-fetch");
-
 /**
  * Web server setup module
  * Handles health check endpoint + keeps deployment alive via self-ping

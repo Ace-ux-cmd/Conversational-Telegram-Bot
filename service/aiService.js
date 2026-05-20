@@ -13,17 +13,9 @@ const getUser = require("../controllers/authController");
  */
 async function getAIResponse(currentUser) {
 
-    // List of API keys for load balancing / fallback rotation
-    const apiKeys = [
-        process.env.GOOGLE_API_KEY1,
-        process.env.GOOGLE_API_KEY7,
-        process.env.GOOGLE_API_KEY8,
-        process.env.GOOGLE_API_KEY9,
-        process.env.GOOGLE_API_KEY0
-    ];
-
-    // Randomly select an API key to distribute request load
-    const randomKey = apiKeys[Math.floor(Math.random() * apiKeys.length)];
+ const getRandomKey = require("../utils/keyRotation");
+ const randomKey = await getRandomKey();
+ 
 
     // Initialize Gemini client with selected key
     const genAI = new GoogleGenerativeAI(randomKey);
@@ -39,7 +31,7 @@ async function getAIResponse(currentUser) {
     // Configure model with system instruction and runtime context
     const model = genAI.getGenerativeModel({
         model: "gemini-2.5-flash-lite",
-        systemInstruction: `${system}. User's name: ${currentUser.username}. Time: ${(new Date()).toLocaleString()}.`
+        systemInstruction: `${system}. This person's name is ${currentUser.username}. currentTime is ${(new Date()).toLocaleString()}.`
     });
 
     // Load or create user memory record
@@ -52,7 +44,7 @@ async function getAIResponse(currentUser) {
     });
 
     // Keep only last 10 messages to limit context size
-    user.messages = user.messages.slice(-10);
+    user.messages = user.messages.slice(-20);
 
     try {
 
@@ -71,7 +63,7 @@ async function getAIResponse(currentUser) {
         });
 
         // Maintain rolling context window
-        user.messages = user.messages.slice(-10);
+        user.messages = user.messages.slice(-20);
 
         // Persist updated history to database
         await user.save();

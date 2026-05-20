@@ -10,15 +10,6 @@ const { defaultConfig, adminConfig } = require("../config/instruction");
  */
 async function aiGroupResponse(currentUser) {
 
-    // Pool of API keys for request distribution / fallback
-    const apiKeys = [
-        process.env.GOOGLE_API_KEY1,
-        process.env.GOOGLE_API_KEY7,
-        process.env.GOOGLE_API_KEY8,
-        process.env.GOOGLE_API_KEY9,
-        process.env.GOOGLE_API_KEY0
-    ];
-
     // Base system prompt defining bot personality
     let system = defaultConfig;
 
@@ -28,7 +19,9 @@ async function aiGroupResponse(currentUser) {
     }
 
     // Random key selection for load balancing
-    const randomKey = apiKeys[Math.floor(Math.random() * apiKeys.length)];
+     const getRandomKey = require("../utils/keyRotation");
+ const randomKey = await getRandomKey();
+
 
     // Initialize Gemini client
     const genAI = new GoogleGenerativeAI(randomKey);
@@ -82,7 +75,7 @@ async function aiGroupResponse(currentUser) {
     } catch (err) {
 
         // Log error for debugging purposes
-        console.error("AI Service Error:", err);
+        console.error("Group ai Service Error:", err);
 
         // Handle rate limiting
         if (err.status === 429) {

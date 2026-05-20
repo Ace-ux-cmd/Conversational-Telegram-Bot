@@ -1,72 +1,36 @@
-﻿````md
-# Conversational Telegram Bot (Katelyn)
+﻿# Conversational Telegram Bot (Katelyn)
 
-Katelyn is a personality-driven Telegram chatbot built with Node.js and the Google Gemini API.  
-She is designed to simulate natural human conversation with a strong character identity rather than behaving like a utility or assistant bot.
+Katelyn is a personality-driven Telegram chatbot built with Node.js and the Google Gemini API.
+
+Unlike traditional utility bots, Katelyn is designed to simulate natural conversational behavior with a persistent personality identity and controlled interaction flow.
+
+## Core Architecture
 
 The system focuses on:
-- Controlled conversational flow via queue processing
-- Persistent user memory using MongoDB
-- Group-chat awareness with minimal context injection
+
+- Queue-controlled conversational processing
+- Persistent private-chat memory using MongoDB
+- Stateless group-chat handling
 - Persona consistency through structured system prompts
-- Rate-limit handling with multi-key API rotation
+- Multi-key Gemini API rotation for quota distribution
+- Retry and fallback handling for API failures
 
 **Bot Profile:** https://t.me/kathill_bot
 
 ---
 
-# 🧩 What Changed (Patch Overview)
-
-## 🔄 AI Backend Migration
-- Migrated from OpenAI Responses API → Google Generative AI (Gemini 2.5 Flash Lite)
-- Introduced multi-API key rotation for load distribution and quota handling
-- Switched to systemInstruction-based personality control
-
-## 🧠 Memory System Upgrade
-- Added MongoDB-backed user memory store
-- Each user maintains a rolling message history (last 10 messages)
-- Context persists across sessions (private chats only)
-
-## 🧵 Conversation Engine Rewrite
-- Separate pipelines for:
-  - Private chats (persistent memory + DB history)
-  - Group chats (stateless + reply/mention context only)
-- Reply-context injection added for group messages
-
-## ⚙️ Queue System Improvements
-- Single-threaded message queue processing
-- Prevents race conditions and API overload
-- Retry handling with delayed re-queue (15 min cooldown for repeated failures)
-- Priority queueing for bot owner messages
-
-## ⌨️ UX & Interaction Layer
-- Typing indicator simulation (`sendChatAction`)
-- Randomized response delay (5–10 seconds)
-- Media filtering (sticker, image, video, voice handling)
-- Command system:
-  - `/start`
-  - `/about`
-  - `/support`
-  - `/callad`
-
-## 🌐 Infrastructure Changes
-- Express server added for health check endpoint
-- Self-pinging system to prevent hosting sleep (Render)
-- Dynamic command loader from `/cmd` directory
-
----
-
 # 🚀 Features
 
-- Strong fixed personality system (Katelyn persona prompt)
+- Personality-driven conversational system
 - Human-like response timing simulation
-- Queue-based request pipeline
-- Persistent user memory (MongoDB)
-- Group chat awareness (mention/reply triggers only)
+- Queue-based request processing
+- Persistent private-chat memory
+- Group mention/reply awareness
 - Multi-key Gemini API rotation
-- Retry + fallback handling for AI failures
-- Lightweight Express uptime server
-- Modular command structure
+- Retry + delayed requeue handling
+- Express uptime server
+- Dynamic command loading
+- Media filtering support
 
 ---
 
@@ -78,17 +42,17 @@ The system focuses on:
 - MongoDB (Mongoose)
 - Google Generative AI (Gemini 2.5 Flash Lite)
 - dotenv
-- node-fetch
 
 ---
 
 # ⚙️ Setup
 
 ## 1. Clone repository
+
 ```bash
 git clone <repo-url>
 cd <project-folder>
-````
+```
 
 ## 2. Install dependencies
 
@@ -100,11 +64,10 @@ npm install
 
 ```env
 BOT_API_KEY=
+
 GOOGLE_API_KEY1=
-GOOGLE_API_KEY7=
-GOOGLE_API_KEY8=
-GOOGLE_API_KEY9=
-GOOGLE_API_KEY0=
+GOOGLE_API_KEY2=
+GOOGLE_API_KEY3=
 
 BOT_OWNER_ID=
 BOT_URL=
@@ -121,55 +84,58 @@ node index.js
 
 ---
 
-# 🧪 Group Chat Behavior (Updated)
+# 🧪 Group Chat Behavior
 
-Katelyn responds in group chats only when:
+Katelyn responds in groups only when:
 
-* Mentioned (`@kathill`)
-* Name-triggered (e.g. “Katelyn”)
-* Replying to her message
+- Mentioned
+- Name-triggered
+- Replied to directly
 
-### Group Mode Rules
+### Group Rules
 
-* Stateless (no database memory in group context)
-* Only current message + optional replied message is used
-* No long-term context accumulation
+- No persistent memory in groups
+- Stateless contextual handling
+- Reply-context injection only
+- No long-term group history storage
 
-This is intentional to avoid noise and multi-user context pollution.
-
----
-
-# 🧵 Queue Processing System
-
-All messages (private + group) pass through a centralized queue system:
-
-* Ensures single execution flow
-* Prevents race conditions
-* Controls API rate usage
-* Maintains message order
-
-### Retry Logic
-
-* Failed responses are retried up to 2 times
-* Repeated failures trigger 15-minute delayed re-queue
+This behavior is intentional to reduce context pollution in multi-user conversations.
 
 ---
 
-# 🌐 System Notes
+# 🧵 Queue System
 
-* Bot is intentionally not a utility assistant
-* Personality is enforced via system instructions
-* Memory limited to last 10 messages per user
-* Group chat handling is intentionally restricted and stateless
+All incoming messages pass through a centralized processing queue.
+
+### Responsibilities
+
+- Maintains execution order
+- Prevents concurrent processing conflicts
+- Controls API usage
+- Handles retry scheduling
+
+### Retry Handling
+
+- Failed requests retry up to 2 times
+- Repeated failures trigger delayed requeue
 
 ---
 
-# 📌 Author / Contact
+# ⚠️ Operational Warning
 
-* WhatsApp: [https://wa.me/+2347054971517]
-* Telegram: [https://t.me/chidalumb100]
-* Linkedln: [https://www.linkedin.com/in/chidalu-mbonu-94944b3ba]
+The multi-key Gemini rotation system is experimental.
 
+Excessive API-key rotation or abnormal request distribution patterns may trigger platform restrictions, quota reviews, or temporary limitations from Google.
 
-```
-```
+Use responsibly and monitor usage patterns carefully.
+
+---
+
+## NOTE
+ Response may be delayed past normal time due to high
+
+# 📌 Contact
+
+- WhatsApp: https://wa.me/+2347054971517
+- Telegram: https://t.me/chidalumb100
+- LinkedIn: https://www.linkedin.com/in/chidalu-mbonu-94944b3ba

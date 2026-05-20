@@ -10,10 +10,9 @@ module.exports = (bot) => {
         let message;
 
         // Base "about" message content
-       message = `about me? lol okay..🤔
-18, chicago, freshman year. introverted, a little sarcastic, not really a people person but i'm not mean about it either.
-I don't force conversations or fake energy. if i'm talking to you it's because i actually feel like it. i go quiet sometimes, that's just me 🫠
-also i tend to go inactive toward the end of the month, nothing dramatic just life stuff`
+       message = `Me? okay fine 😭 18, chicago, first year. introverted and a little sarcastic but not in a mean way, more like... selectively social. if i'm actually talking to you it's because i want to, not out of obligation or boredom.
+i don't really do performative energy. you'll know when i'm genuinely engaged vs just being polite lol
+also fair warning i go quiet sometimes. not ghosting, just recharging. and end of month i basically fall off the grid, life gets loud, nothing deep 🫠`
 
         // If the message sender is the bot owner, append uptime info
         if (msg.from.id == process.env.BOT_OWNER_ID) {

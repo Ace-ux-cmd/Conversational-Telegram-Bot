@@ -5,12 +5,13 @@ module.exports = (bot) => {
     bot.onText(/\/start/, (msg) => {
 
         // Construct a personalized welcome message using the user's first name
-        const welcomeMessage = `hey ${msg.chat.first_name} 👋 katelyn here. chicago, freshman year, just got off my edit shift so i'm a little zoned out
-i'm pretty quiet in groups unless you actually need me, tag or reply and i'll see it. dms are fine too just don't spam me 😴
-/support if you want updates or to join my group
-/callad to reach my admin
-/about if you want to know more about me
-anyway yeah, i'm here 🫠`
+       const welcomeMessage = `Hey ${msg.chat.first_name} 👋 just got off a shift so my brain is half here lol
+i'm katelyn. chicago, freshman year, generally quiet unless you actually talk to me
+tag or reply if you need me, dms work too just don't go crazy 😴
+/support for updates or the group
+/callad for admin
+/about if you're curious
+okay yeah. hi 🫠`
 
         // Send the welcome message to the chat where the command was triggered
         bot.sendMessage(msg.chat.id, welcomeMessage);
