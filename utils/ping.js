@@ -1,28 +1,21 @@
-// Import fetch for making HTTP requests (used for self-ping)
-const fetch = require("node-fetch");
-
 /**
  * Web server setup module
  * Handles health check endpoint + keeps deployment alive via self-ping
  */
 module.exports = (app) => {
 
-    // Basic health check route to confirm bot/server is running
+    // Basic health check route to confirm GAME/server is running
     app.get("/", (req, res) => {
-        res.send("Bot is running ✅");
-    });
-
-    // Determine server port (Render uses dynamic PORT)
-    const PORT = process.env.PORT || 3000;
-
-    // Start HTTP server
-    app.listen(PORT, () => {
-        console.log(`Web server running on port ${PORT}`);
+        res.send("GAME is running ✅");
     });
 
     // Base URL used for self-pinging (keeps service awake on hosting platforms like Render)
     const BOT_URL = process.env.BOT_URL;
 
+    if (!BOT_URL) {
+    console.warn("BOT_URL not set, skipping self-ping");
+    return;
+}
     /**
      * Self-ping mechanism:
      * Prevents the server from sleeping due to inactivity
@@ -31,7 +24,7 @@ module.exports = (app) => {
     setInterval(async () => {
         try {
 
-            // Send GET request to bot URL
+            // Send GET request to GAME URL
             await fetch(BOT_URL);
 
             console.log("Self-ping successful ✅");
