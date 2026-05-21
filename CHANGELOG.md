@@ -4,67 +4,150 @@ All notable changes to the Conversational Telegram Bot (Katelyn) will be documen
 
 ---
 
-## v1.0.0 - Initial Stable Architecture
+# v1.0.0 - Initial Stable Architecture
 
-### Added
-- Node.js Telegram chatbot core with personality-driven design
-- Google Gemini API integration for conversational responses
-- MongoDB user memory system (persistent private chat memory)
-- Queue-based message processing system for controlled execution flow
-- Group chat awareness using mention, name-trigger, and reply detection
-- Stateless group chat mode (no long-term context storage)
-- Retry handling system with delayed re-queue logic
-- Priority queue support for bot owner messages
-- Express server for health checks and uptime monitoring
-- Self-pinging system to prevent hosting sleep (Render)
-- Dynamic command loader from `/cmd` directory
-- Basic command system:
+## Added
+
+### Core System
+- Node.js Telegram chatbot core with personality-driven architecture
+- Google Gemini API integration for conversational AI responses
+- Modular project structure with separated controllers, services, commands, models, and utilities
+- Dynamic command auto-loader from `/cmd` directory
+
+### AI & Conversation Engine
+- Structured `systemInstruction` personality control system
+- Separate AI pipelines for:
+  - Private chats (persistent memory)
+  - Group chats (stateless contextual mode)
+- Reply-context injection system for group conversations
+- Human-like conversational pacing through delayed responses
+- Typing indicator simulation using Telegram chat actions
+
+### Memory System
+- MongoDB-backed persistent memory system
+- Automatic user creation and retrieval flow
+- Rolling conversation context storage
+- Context capped to latest 10 messages per user
+
+### Queue Architecture
+- Centralized queue-based request processing system
+- Sequential execution flow to prevent concurrent AI calls
+- Retry handling system for failed responses
+- Delayed retry cooldown system (15-minute requeue)
+- Priority queue support for bot owner requests
+
+### Group Chat Support (Beta)
+- Mention-based activation
+- Name-trigger activation
+- Reply-based activation
+- Stateless group mode to avoid context pollution
+- Context isolation between group users
+
+### Interaction Layer
+- Media filtering system for:
+  - Stickers
+  - Images
+  - Videos
+  - Voice notes
+- Command system:
   - `/start`
   - `/about`
   - `/support`
   - `/callad`
-- Typing indicator simulation (`sendChatAction`)
-- Randomized response delay system (5–10 seconds)
-- Media filtering (sticker, image, video, voice handling)
 
-### Changed
-- Migrated AI backend from OpenAI Responses API to Google Generative AI (Gemini 2.5 Flash Lite)
-- Replaced prompt handling with `systemInstruction`-based personality control
-- Reworked conversation engine into separate pipelines:
-  - Private chat pipeline (memory + DB context)
-  - Group chat pipeline (stateless context only)
-- Improved queue system to prevent race conditions and API overload
+### Infrastructure
+- Express.js health-check server
+- Render-compatible self-pinging uptime system
+- Environment-based configuration using dotenv
+- Telegram polling error logging
 
 ---
 
-## v1.1.0 - API Resilience & Architecture Refactor
+## Changed
 
-### Added
-- API key rotation module for distributing requests across multiple Gemini keys
-- API health-check module that validates selected key before sending request
-- Response gating system: only valid API responses proceed to generator pipeline
+### AI Backend Migration
+- Migrated from OpenAI Responses API → Google Generative AI (Gemini 2.5 Flash Lite)
+- Replaced traditional prompt handling with `systemInstruction`-based persona control
+- Reworked conversational flow into separate private/group execution pipelines
 
-### Changed
-- Refactored response handling in command system for cleaner execution flow
-- Improved separation between:
-  - key selection
-  - key validation
-  - response generation (private + group unified flow)
-- Updated bot personality instructions for stronger consistency and behavior control
+### Queue Improvements
+- Improved queue handling to reduce:
+  - Race conditions
+  - API overload
+  - Out-of-order responses
+- Added controlled execution cooldown between requests
 
-### Removed
-- Redundant npm packages that were not used in production logic
-- Unused utility modules that duplicated queue and request handling logic
-
-### Fixed
-- Reduced risk of API failures propagating into response generation layer
-- Improved stability during high request load or key exhaustion scenarios
+### Conversation Handling
+- Improved personality consistency across sessions
+- Improved context formatting before AI generation
+- Improved reply detection and contextual awareness in groups
 
 ---
 
-## Notes
+## Fixed
+- Reduced risk of overlapping AI executions
+- Reduced instability during high message load
+- Improved fallback handling for failed AI responses
+- Improved message ordering consistency
+
+---
+
+# v1.1.0 - API Resilience & Architecture Refactor
+
+## Added
+
+### API Reliability Layer
+- Multi-key Gemini API rotation system
+- API health-check validation before request execution
+- Response gating system to reject invalid AI outputs before pipeline continuation
+
+### Internal Architecture
+- Unified AI response generation flow for private and group handling
+- Cleaner service separation between:
+  - Key selection
+  - Key validation
+  - Response generation
+- Improved modularization of AI-related services
+
+---
+
+## Changed
+
+### System Refactor
+- Refactored command execution flow for cleaner handler structure
+- Improved separation of concerns across:
+  - Controllers
+  - Services
+  - Models
+  - Utilities
+
+### Personality System
+- Updated personality instruction rules for:
+  - Better conversational consistency
+  - Stronger behavior enforcement
+  - Reduced assistant-like responses
+
+---
+
+## Removed
+- Redundant npm packages unused in production
+- Duplicate utility logic related to queue/request handling
+- Legacy OpenAI-specific implementation remnants
+
+---
+
+## Fixed
+- Reduced risk of API failures propagating into generation pipeline
+- Improved handling during API quota exhaustion
+- Improved stability under sustained request load
+- Reduced inconsistent response behavior across chat types
+
+---
+
+# Notes
+
 - Versions below `v1.0.0` are considered experimental development stages.
-- Future updates will follow semantic versioning:
-  - PATCH: bug fixes
-  - MINOR: new features
-  - MAJOR: breaking changes or architecture rewrites
+- Future updates follow semantic versioning:
+  - PATCH → bug fixes
+  - MINOR → features and improvements
+  - MAJOR → architecture rewrites or breaking changes
