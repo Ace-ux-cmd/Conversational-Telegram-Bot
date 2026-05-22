@@ -14,10 +14,10 @@ const randomDelay = () => Math.floor(Math.random() * 6 + 5) * 1000;
  */
 async function processUserRequest(bot, currentUser) {
 
-    const recipienttId = currentUser.chatId || currentUser.userId;
+    const recipientId = currentUser.chatId || currentUser.userId;
 
     // Show Telegram "typing..." indicator to the user
-    bot.sendChatAction(recipienttId, "typing");
+    bot.sendChatAction(recipientId, "typing");
 
     const userText = currentUser.message;
 
@@ -26,7 +26,7 @@ async function processUserRequest(bot, currentUser) {
 if (currentUser.userId != process.env.BOT_OWNER_ID && isUsingKat) {
     
     // Warn, or ignore the user here
-   bot.sendMessage(recipienttId, "Only the Elvis can call me Kat!");
+    bot.sendMessage(recipientId, "Kat? That's reserved. Try something else 😐");
    return;
 }
 
@@ -64,9 +64,9 @@ if (currentUser.userId != process.env.BOT_OWNER_ID && isUsingKat) {
             // Final fallback response when AI fails consistently
             bot.sendMessage(
                 currentUser.chatId,
-                `Sorry, i'm slammed with work and school and have no time left for chats this month😩🫩.
-Anyways, don't bother replying to this, i'll be back at the start of next month.
-Keep it chill till then.`,
+                `Sorry, I'm slammed rn and have no time for chats 😩🫠
+                Anyways, don't bother replying, I'll be back soon.
+                Keep it chill till then.`,
                 {
                     reply_to_message_id: currentUser.msgId
                 }

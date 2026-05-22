@@ -108,7 +108,8 @@ All notable changes to the Conversational Telegram Bot (Katelyn) will be documen
   - Key validation
   - Response generation
 - Improved modularization of AI-related services
-- Added Retry logic
+- Added retry handling logic for failed AI response generation
+- Added short-name trigger support for easier bot invocation in groups
 
 ---
 
@@ -143,6 +144,8 @@ All notable changes to the Conversational Telegram Bot (Katelyn) will be documen
 - Improved handling during API quota exhaustion
 - Improved stability under sustained request load
 - Reduced inconsistent response behavior across chat types
+- Fixed reply-to-bot detection by explicitly tracking bot username
+- Fixed self-ping reliability issues affecting uptime stability
 
 ---
 

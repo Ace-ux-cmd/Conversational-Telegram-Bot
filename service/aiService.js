@@ -25,7 +25,7 @@ async function getAIResponse(currentUser) {
 
     // Apply elevated admin behavior if request comes from bot owner
     if (currentUser.userId == process.env.BOT_OWNER_ID) {
-        system += ` ${adminConfig}`;
+        system += `${adminConfig}`;
     }
 
     // Configure model with system instruction and runtime context
@@ -43,7 +43,7 @@ async function getAIResponse(currentUser) {
         parts: [{ text: currentUser.message }]
     });
 
-    // Keep only last 10 messages to limit context size
+    // Keep only last 20 messages to limit context size
     user.messages = user.messages.slice(-20);
 
     try {
@@ -76,7 +76,7 @@ async function getAIResponse(currentUser) {
         console.error("AI Service Error:", e.message);
 
         // Rate-limit handling
-        if (e.status === 429) return "Slow down with the messages, would you?";
+        if (e.status === 429) return "I need a moment between thoughts, you know? Slow down a little.";
 
         // Generic failure fallback
         return null;

@@ -12,25 +12,30 @@
         process.env.GOOGLE_API_KEY8, 
         process.env.GOOGLE_API_KEY9, 
         process.env.GOOGLE_API_KEY0
-    ];
+    ].filter(Boolean); // Cleans out any missing/undefined environment variables
 
     let currentIndex = 0;
-    const startTime = Date.now();
 
     // Distribute load across available Api keys
-
     module.exports = async ()=>{
+
+        //  Initialize tracking variables *inside* the function scope
+    const startTime = Date.now();
     const start = currentIndex;
-       let isValid; 
-       let key;
+    let isValid; 
+    let key;
+
     do{
 
-        key = apiKeys[currentIndex % apiKeys.length];
+        // Safely grab and rotate the index
+        key = apiKeys[currentIndex];
         currentIndex = (currentIndex + 1 )% apiKeys.length;
 
+        // Validate the current key
         isValid = await apiFunc(key);
 
-        if ((Date.now() - startTime )/60000 >= 5) return null;
+        // Safety Guard A: Localized timeout (Max 1 minute per request cycle)
+        if ((Date.now() - startTime )/60000 >= 5) return key;
 
     }while(!isValid)
         return key;

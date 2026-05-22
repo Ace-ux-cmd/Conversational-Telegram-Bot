@@ -6,7 +6,9 @@ module.exports = async(apiKey)=>{
     try{
 
          // Fetch api key using GET method
-    const res = await fetch(url, {method: "GET"});
+    const res = await fetch(url, {
+        method: "GET"
+    });
 
     // Checks for status code (200 - 299)
     if(res.ok){
@@ -19,6 +21,7 @@ module.exports = async(apiKey)=>{
     return false;
 
 }catch(e){
+
         console.error("Error Validating api key", e.message);
         return false;
     }

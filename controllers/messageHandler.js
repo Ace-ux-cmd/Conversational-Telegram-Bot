@@ -69,8 +69,9 @@ module.exports = (bot) => {
         if (msg.sticker) return bot.sendMessage(chatId, "A sticker huh? Try using an emoji instead 🥲");
         if (msg.photo) return bot.sendMessage(chatId, "I can't see images right now 😐! Wanna describe it? 🥹");
         if (msg.video) return bot.sendMessage(chatId, "A video? What's it about?");
-        if (msg.voice) return bot.sendMessage(chatId, "You sound like a broken toy Just type.");
+        if (msg.voice) return bot.sendMessage(chatId, "Not a phone call kinda person, type it out instead 🙂");
 
+        
         // Ignore non-text messages
         if (!msg.text) return;
 

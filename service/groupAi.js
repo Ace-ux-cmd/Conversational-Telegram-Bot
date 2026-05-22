@@ -79,7 +79,7 @@ async function aiGroupResponse(currentUser) {
 
         // Handle rate limiting
         if (err.status === 429) {
-            return "Slow down with the messages, would you?";
+            return "Too many messages at once, give it a second before sending more.";
         }
 
         // Generic failure fallback

@@ -19,7 +19,7 @@ module.exports = (app) => {
     /**
      * Self-ping mechanism:
      * Prevents the server from sleeping due to inactivity
-     * Runs every 25 minutes
+     * Runs every 10 minutes
      */
     setInterval(async () => {
         try {
@@ -35,5 +35,5 @@ module.exports = (app) => {
             console.error("Self-ping failed ❌", err);
         }
 
-    }, 10 * 60 * 1000); // 25 minutes interval
+    }, 10 * 60 * 1000); // 10 minutes interval
 };
