@@ -8,7 +8,7 @@ const bot = new TelegramBot(process.env.BOT_API_KEY, { polling: true });
 // Initialize Express server instance
 const express = require("express");
 const app = express();
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 3000
 
 // File system module used for dynamic command loading
 const fs = require("fs");

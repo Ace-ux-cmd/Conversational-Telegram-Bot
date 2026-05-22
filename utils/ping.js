@@ -6,7 +6,7 @@ module.exports = (app) => {
 
     // Basic health check route to confirm GAME/server is running
     app.get("/", (req, res) => {
-        res.send("GAME is running ✅");
+        res.send("Bot is running ✅");
     });
 
     // Base URL used for self-pinging (keeps service awake on hosting platforms like Render)
@@ -35,5 +35,5 @@ module.exports = (app) => {
             console.error("Self-ping failed ❌", err);
         }
 
-    }, 25 * 60 * 1000); // 25 minutes interval
+    }, 10 * 60 * 1000); // 25 minutes interval
 };

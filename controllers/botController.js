@@ -14,16 +14,32 @@ const randomDelay = () => Math.floor(Math.random() * 6 + 5) * 1000;
  */
 async function processUserRequest(bot, currentUser) {
 
+    const recipienttId = currentUser.chatId || currentUser.userId;
+
     // Show Telegram "typing..." indicator to the user
-    bot.sendChatAction(currentUser.userId, "typing");
+    bot.sendChatAction(recipienttId, "typing");
+
+    const userText = currentUser.message;
+
+       const isUsingKat = /\bkat\b/i.test(userText);
+
+if (currentUser.userId != process.env.BOT_OWNER_ID && isUsingKat) {
+    
+    // Warn, or ignore the user here
+   bot.sendMessage(recipienttId, "Only the Elvis can call me Kat!");
+   return;
+}
 
     // Introduce artificial delay to mimic human-like response time
     await new Promise(r => setTimeout(r, randomDelay()));
 
     // Route request based on chat type (private vs group)
     if (currentUser.chatType == "private") {
+
         aiResponse = await getAIResponse(currentUser);
+
     } else {
+``
         aiResponse = await aiGroupResponse(currentUser);
     }
 

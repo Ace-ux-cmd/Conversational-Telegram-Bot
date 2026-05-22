@@ -108,6 +108,7 @@ All notable changes to the Conversational Telegram Bot (Katelyn) will be documen
   - Key validation
   - Response generation
 - Improved modularization of AI-related services
+- Added Retry logic
 
 ---
 
@@ -120,6 +121,7 @@ All notable changes to the Conversational Telegram Bot (Katelyn) will be documen
   - Services
   - Models
   - Utilities
+- Increased memory length 10 -> 20
 
 ### Personality System
 - Updated personality instruction rules for:

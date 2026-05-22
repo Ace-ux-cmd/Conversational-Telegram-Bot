@@ -106,7 +106,7 @@ module.exports = (bot) => {
 
             } 
             // Otherwise ignore unless bot is mentioned
-            else if (!text.includes('katelyn') && !text.includes(botTag)) {
+            else if (!text.includes('katelyn') && !text.includes(botTag) && !text.includes("kat")) {
                 return;
             }
         }

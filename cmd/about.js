@@ -16,7 +16,7 @@ also fair warning i go quiet sometimes. not ghosting, just recharging. and end o
 
         // If the message sender is the bot owner, append uptime info
         if (msg.from.id == process.env.BOT_OWNER_ID) {
-            message += `Been online since ${uptime}`
+            message += `\n Been online since ${uptime}`
         }
 
         // Send the final message to the chat where the command was triggered
