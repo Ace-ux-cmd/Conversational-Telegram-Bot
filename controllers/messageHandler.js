@@ -99,7 +99,7 @@ module.exports = (bot) => {
             const botTag = '@kathill';
 
             // If replying directly to bot message, attach context
-            if (reply && reply.from.username === 'kathill') {
+            if (reply && reply.from.username === 'kathill_bot') {
 
                 pending.botName = 'kathill';
                 pending.replied_message = reply.text || reply.caption || "";
