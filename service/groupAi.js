@@ -1,91 +1,104 @@
-// Import Gemini AI SDK
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenAI } = require("@google/genai");
 
-// Import system instruction config (persona + admin mode)
-const { defaultConfig, adminConfig } = require("../config/instruction");
+// Behavioral configurations based on user status
+const { defaultConfig, adminConfig, ownerConfig } = require("../config/instruction");
 
-/**
- * Generates AI response for group chat context
- * Handles reply context + message formatting for conversational continuity
- */
+// Core infrastructural dependencies and load balancing utility hooks
+const getRandomKey = require("../utils/keyRotation");
+const invalidKeys = require("../utils/invalidKeys");
+const { getById } = require("../models/userModel");
+
 async function aiGroupResponse(currentUser) {
+  let assignedKey = null;
 
-    // Base system prompt defining bot personality
-    let system = defaultConfig;
-
-    // Elevated behavior for bot owner
-    if (currentUser.userId == process.env.BOT_OWNER_ID) {
-        system += ` ${adminConfig}`;
+  try {
+    // Fetch profile details from storage engine
+    const user = await getById(currentUser.userId);
+    
+    // Safety Guard: Stop processing if the account is currently marked as banned
+    if (user?.status === "banned") {
+      return "yeah i'm not supposed be talking to you rn. if you think this is a mistake, type /callad and sort it out.";
     }
 
-    // Random key selection for load balancing
-     const getRandomKey = require("../utils/keyRotation");
- const randomKey = await getRandomKey();
+    // Pull an active key string from rotation array
+    assignedKey = await getRandomKey();
+    if (!assignedKey) {
+      throw new Error("No operational API keys available in execution rotation array.");
+    }
 
+    // Initialize unified client instance matching the latest @google/genai SDK specifications
+    const ai = new GoogleGenAI({ apiKey: assignedKey });
 
-    // Initialize Gemini client
-    const genAI = new GoogleGenerativeAI(randomKey);
+    // Assemble base target identity text rule configuration lines
+    let systemInstructionText = defaultConfig;
 
-    // Configure model with system instruction + runtime context
-    const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash-lite",
-        systemInstruction: `${system}. User's name: ${currentUser.username}. Time: ${(new Date()).toLocaleString()}.`
+    switch (user?.role) {
+      case "owner":
+        systemInstructionText += ownerConfig;
+        break;
+      case "admin":
+        systemInstructionText += adminConfig;
+        break;
+    }
+
+    // Append real-time metadata constraints dynamically to focus performance metrics
+    systemInstructionText += 
+      `\n\n[Runtime Context]\n` +
+      `• Target User Name: ${currentUser.username || "Anonymous"}\n` +
+      `• Current Timestamp: ${new Date().toISOString()}\n` +
+      `Note: This is a shared group context. Keep it short, natural, and matching your persona constraints.`;
+
+    // Payload Layout Assembly: Map inline conversational history nodes
+    const contentPayload = [];
+
+    // If this message targets a reply message thread node, inject context at index 0
+    if (currentUser.replied_message) {
+      contentPayload.push({
+        role: "user",
+        parts: [{ text: `[Context - replied to message]: "${currentUser.replied_message}"` }]
+      });
+      
+      // Inject a mock assistant model acknowledgement to help the model maintain conversational context alignment
+      contentPayload.push({
+        role: "model",
+        parts: [{ text: "got the context. what about it?" }]
+      });
+    }
+
+    // Append the active message text directly into the generative array pipeline
+    contentPayload.push({
+      role: "user",
+      parts: [{ text: currentUser.message }]
     });
 
-    /**
-     * Format current user message into Gemini chat structure
-     */
-    const currentMessages = [
-        {
-            role: "user",
-            parts: [{ text: currentUser.message }]
-        }
-    ];
+    // Complete generation call using the updated SDK standards
+    const responseWrapper = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: contentPayload,
+      config: {
+        systemInstruction: systemInstructionText
+      }
+    });
 
-    /**
-     * If message is a reply in a group,
-     * prepend context of the original message being replied to
-     */
-    if (currentUser.replied_message) {
-        currentMessages.unshift({
-            role: 'user',
-            parts: [{
-                text: `[Context - replied to message]: "${currentUser.replied_message}"`
-            }]
-        });
+    // Resolve text block output from the finalized schema response wrapper object
+    const aiResponse = responseWrapper.text;
+    return aiResponse || null;
+
+  } catch (err) {
+    console.error("Group AI Generation Service Engine Exception:", err.message);
+
+    // Isolate and temporarily blacklist keys throwing 429 errors
+    const errorStatusCode = err.status || err.statusCode || (err.response ? err.response.status : null);
+
+    if (errorStatusCode === 429 && assignedKey) {
+      // Log timestamp signature into the tracking cache layer to pause selection cycles
+      invalidKeys.set(assignedKey, Date.now());
+      return "i need a moment between thoughts, you know? slow down a little.";
     }
 
-    try {
-
-        // Start chat session using previous messages as history (excluding latest)
-        const chat = model.startChat({
-            history: currentMessages.slice(0, -1)
-        });
-
-        // Extract last user message to send as prompt
-        const lastMessage =
-            currentMessages[currentMessages.length - 1].parts[0].text;
-
-        // Send message to model and wait for response
-        const responses = await chat.sendMessage(lastMessage);
-
-        // Return AI-generated text response
-        return responses.response.text();
-
-    } catch (err) {
-
-        // Log error for debugging purposes
-        console.error("Group ai Service Error:", err);
-
-        // Handle rate limiting
-        if (err.status === 429) {
-            return "Too many messages at once, give it a second before sending more.";
-        }
-
-        // Generic failure fallback
-        return null;
-    }
+    // Catch-all safety boundary drop out prevents system loops from freezing the runtime engine
+    return null;
+  }
 }
 
-// Export group AI response handler
 module.exports = { aiGroupResponse };

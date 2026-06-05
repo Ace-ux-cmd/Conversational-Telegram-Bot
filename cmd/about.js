@@ -1,25 +1,24 @@
-// Capture the bot's startup time (used for uptime display)
-let uptime = (new Date()).toLocaleString()
-
-// Export a function that receives the bot instance
 module.exports = (bot) => {
-
-    // Listen for the "/about" command using regex
+    // Listen for the "/about" command
     bot.onText(/\/about/, async (msg) => {
+        const chatId = msg.chat.id;
 
-        let message;
+        try {
+            // Static text aligned with the Katelyn Hayes persona configuration
+            const biography = 
+                `me? okay fine 😭 18, cali, college freshman. introverted and a little sarcastic but ` +
+                `not in a mean way, more like... selectively social. if i'm actually texting you it's ` +
+                `because i want to, not out of obligation or boredom.\n\n` +
+                `i don't really do performative energy. you'll know when i'm genuinely engaged vs just ` +
+                `being polite lol. also fair warning i go quiet sometimes. not ghosting, just recharging ` +
+                `from dorm life and coffee shop shifts. life gets loud, nothing deep 🫠`;
 
-        // Base "about" message content
-       message = `Me? okay fine 😭 18, chicago, first year. introverted and a little sarcastic but not in a mean way, more like... selectively social. if i'm actually talking to you it's because i want to, not out of obligation or boredom.
-i don't really do performative energy. you'll know when i'm genuinely engaged vs just being polite lol
-also fair warning i go quiet sometimes. not ghosting, just recharging. and end of month i basically fall off the grid, life gets loud, nothing deep 🫠`
+            // Deliver bio text safely to the request origin chat
+            await bot.sendMessage(chatId, biography);
 
-        // If the message sender is the bot owner, append uptime info
-        if (msg.from.id == process.env.BOT_OWNER_ID) {
-            message += `\n Been online since ${uptime}`
+        } catch (err) {
+            // Prevent execution exceptions from dropping the runtime engine
+            console.error("Critical failure in /about route execution:", err.message);
         }
-
-        // Send the final message to the chat where the command was triggered
-        bot.sendMessage(msg.chat.id, message)
-    })
-}
+    });
+};

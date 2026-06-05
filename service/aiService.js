@@ -1,87 +1,96 @@
-// Import Gemini AI SDK
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenAI } = require("@google/genai");
 
-// Import system prompts (persona + admin mode)
-const { defaultConfig, adminConfig } = require("../config/instruction");
+// Trailing behavioral configurations based on user status tier matrices
+const { defaultConfig, adminConfig, ownerConfig } = require("../config/instruction");
 
-// Import user memory handler (DB fetch/create)
-const getUser = require("../controllers/authController");
+// Core infrastructural dependencies and load balancing utility hooks
+const getRandomKey = require("../utils/keyRotation"); 
+const invalidKeys = require("../utils/invalidKeys"); 
+const { getHistory } = require("../models/messagesModel"); 
+const formatHistory = require("../utils/formatHistory"); 
+const deltaSeconds = require("../utils/deltaSeconds"); 
+const activity = require("../utils/activity"); 
+const { getById } = require("../models/userModel"); 
 
-/**
- * Generates AI response for a private user conversation
- * Maintains context using stored message history in MongoDB
- */
+
 async function getAIResponse(currentUser) {
-
- const getRandomKey = require("../utils/keyRotation");
- const randomKey = await getRandomKey();
- 
-
-    // Initialize Gemini client with selected key
-    const genAI = new GoogleGenerativeAI(randomKey);
-
-    // Base system instruction (persona definition)
-    let system = defaultConfig;
-
-    // Apply elevated admin behavior if request comes from bot owner
-    if (currentUser.userId == process.env.BOT_OWNER_ID) {
-        system += `${adminConfig}`;
-    }
-
-    // Configure model with system instruction and runtime context
-    const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash-lite",
-        systemInstruction: `${system}. This person's name is ${currentUser.username}. currentTime is ${(new Date()).toLocaleString()}.`
-    });
-
-    // Load or create user memory record
-    const user = await getUser(currentUser.userId, currentUser.username);
-
-    // Append latest user message to conversation history
-    user.messages.push({
-        role: "user",
-        parts: [{ text: currentUser.message }]
-    });
-
-    // Keep only last 20 messages to limit context size
-    user.messages = user.messages.slice(-20);
+    // Declare outside block scope to guarantee catch block accessibility during runtime failures
+    let assignedKey = null;
 
     try {
+        // Fetch complete profile metrics from storage engine
+        const user = await getById(currentUser.userId);
+        
+        // Stop processing if the account is currently marked as banned
+        if (user?.status === "banned") {
+            return "yeah i'm not supposed be talking to you rn. if you think this is a mistake, type /callad and sort it out.";
+        }
 
-        // Generate AI response using full conversation context
-        const result = await model.generateContent({
-            contents: user.messages
+        // Pull an active key string from rotation array
+        assignedKey = await getRandomKey();
+        if (!assignedKey) {
+            throw new Error("No operational API keys available in execution rotation array.");
+        }
+
+        // Initialize unified client instance matching the latest @google/genai SDK specifications
+        const ai = new GoogleGenAI({ apiKey: assignedKey });
+
+        // Compile situational background state metrics
+        const scheduleContext = activity();
+        const messageHistory = await getHistory(currentUser.userId).catch(() => []);
+        const messages = formatHistory(messageHistory);
+        const lastDelta = deltaSeconds(messageHistory);
+
+        // Assemble base target identity text rule configuration lines
+        let systemInstructionText = defaultConfig;
+
+        switch (user?.role) {
+            case "owner":
+                systemInstructionText += ownerConfig;
+                break;
+            case "admin":
+                systemInstructionText += adminConfig;
+                break;
+        }
+
+        // Append real-time metadata constraints dynamically to focus performance metrics
+        systemInstructionText += 
+            `\n\n[Runtime Context]\n` +
+            `• Target User Name: ${currentUser.username || "Anonymous"}\n` +
+            `• Environmental Activity: ${scheduleContext}\n` +
+            `• Current Timestamp: ${new Date().toISOString()}\n` +
+            `• Delay Interval: +${lastDelta}s.\n` +
+            `Use interval strictly to judge conversation pacing; do not copy or explicitly reference metrics in text.`+
+            `• And Don't send non-text responses\n` ;
+
+        // Complete generation call using the updated SDK standards
+        const responseWrapper = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: messages,
+            config: {
+                systemInstruction: systemInstructionText
+            }
         });
 
-        // Extract response text from Gemini output
-        const aiResponse = result.response.text();
+        // Resolve text block output from the finalized schema response wrapper object
+        const aiResponse = responseWrapper.text;
+        return aiResponse || null;
 
-        // Store AI response in conversation history
-        user.messages.push({
-            role: "model",
-            parts: [{ text: aiResponse }]
-        });
+    } catch (err) {
+        console.error("AI Generation Core Service Engine Exception:", err.message);
 
-        // Maintain rolling context window
-        user.messages = user.messages.slice(-20);
+        // Handle Resource Constraints: Isolate and temporarily blacklist keys throwing 429 errors
+        const errorStatusCode = err.status || err.statusCode || (err.response ? err.response.status : null);
+        
+        if (errorStatusCode === 429 && assignedKey) {
+            // Log timestamp signature into the tracking cache layer to pause selection cycles
+            invalidKeys.set(assignedKey, Date.now());
+            return "i need a moment between thoughts, you know? slow down a little.";
+        }
 
-        // Persist updated history to database
-        await user.save();
-
-        return aiResponse;
-
-    } catch (e) {
-
-        // Log failure for debugging
-        console.error("AI Service Error:", e.message);
-
-        // Rate-limit handling
-        if (e.status === 429) return "I need a moment between thoughts, you know? Slow down a little.";
-
-        // Generic failure fallback
+        // Catch-all safety boundary drop out prevents system loops from freezing the runtime engine
         return null;
     }
 }
 
-// Export AI service function
 module.exports = { getAIResponse };

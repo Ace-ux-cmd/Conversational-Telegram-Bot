@@ -1,0 +1,70 @@
+{
+  "Fun & Games": {
+    "truthordare": {
+      "details": "just a classic truth or dare prompt if you're bored.",
+      "usage": "/truthordare"
+    },
+    "quiz": {
+      "details": "i'll drop a random question. answer right to get points.",
+      "usage": "/quiz"
+    },
+    "slot": {
+      "details": "spin the slots and pray the icons match so you win coins.",
+      "usage": "/slot <amount>"
+    }
+  },
+  "Economy": {
+    "daily": {
+      "details": "grab your free daily points once a day.",
+      "usage": "/daily"
+    }
+  },
+  "Utility": {
+    "start": {
+      "details": "basically a quick intro and a list of my main stuff.",
+      "usage": "/start"
+    },
+    "about": {
+      "details": "if you're actually curious about me or whatever.",
+      "usage": "/about"
+    },
+    "support": {
+      "details": "spawns some group links that delete themselves after 5 seconds.",
+      "usage": "/support"
+    },
+    "rank": {
+      "details": "shows the leaderboard to see who has the most points right now.",
+      "usage": "/rank"
+    },
+    "ping": {
+      "details": "just to check if i'm actually awake and responding.",
+      "usage": "/ping"
+    }
+  },
+  "Admin & Owner Only": {
+    "callad": {
+      "details": "pulls up the admin contact links for 5 seconds.",
+      "usage": "/callad"
+    },
+    "ban": {
+      "details": "blocks someone from using me entirely.",
+      "usage": "/ban <user_id>"
+    },
+    "unban": {
+      "details": "lets someone back in after they've been banned.",
+      "usage": "/unban <user_id>"
+    },
+    "update": {
+      "details": "changes what role or permissions a user has.",
+      "usage": "/update <user_id> <role>"
+    },
+    "notify": {
+      "details": "blasts a message out to everyone using the bot at once.",
+      "usage": "/notify <message>"
+    },
+    "leave": {
+      "details": "makes me dip from either one group or all of them.",
+      "usage": "/leave [group_id]"
+    }
+  }
+}

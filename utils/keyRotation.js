@@ -1,6 +1,7 @@
- const apiFunc = require ("./validateApiKey");
+//  Require invalidKeys map from external module
+const invalidKeys = require("./invalidKeys");
 
-     // List of API keys for load balancing / fallback rotation
+ // List of API keys for load balancing / fallback rotation
     const apiKeys = [
         process.env.GOOGLE_API_KEY1,
         process.env.GOOGLE_API_KEY2,
@@ -15,28 +16,20 @@
     ].filter(Boolean); // Cleans out any missing/undefined environment variables
 
     let currentIndex = 0;
-
+    
     // Distribute load across available Api keys
     module.exports = async ()=>{
 
+    let startIndex = currentIndex //  A variable to monitor api rotation and avoid infinite loops
+
         //  Initialize tracking variables *inside* the function scope
-    const startTime = Date.now();
-    const start = currentIndex;
-    let isValid; 
     let key;
-
-    do{
-
+    do {
         // Safely grab and rotate the index
         key = apiKeys[currentIndex];
         currentIndex = (currentIndex + 1 )% apiKeys.length;
 
-        // Validate the current key
-        isValid = await apiFunc(key);
-
-        // Safety Guard A: Localized timeout (Max 1 minute per request cycle)
-        if ((Date.now() - startTime )/60000 >= 5) return key;
-
-    }while(!isValid)
+        if(startIndex === currentIndex) return key //Handles invalid key in aiResponse function
+}while(invalidKeys.has(key) || !key)
         return key;
     }

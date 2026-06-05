@@ -1,0 +1,14 @@
+{
+  "type": "OBJECT",
+  "properties": {
+    "chatResponse": {
+      "type": "STRING",
+      "description": "Your natural conversational response back to the user based on your persona, instructions, and their image/caption."
+    },
+    "imageDescription": {
+      "type": "STRING",
+      "description": "A short, distinct, objective text description of exactly what is visually present within the image frames for archiving history. Example: 'a ginger cat sleeping on a blue sofa'."
+    }
+  },
+  "required": ["chatResponse", "imageDescription"]
+}

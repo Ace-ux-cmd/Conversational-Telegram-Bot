@@ -1,137 +1,204 @@
 # Conversational Telegram Bot (Katelyn)
 
-Katelyn is a personality-driven Telegram chatbot built with Node.js and the Google Gemini API.
+Katelyn is a highly disciplined, personality-driven Telegram chatbot built on Node.js, PostgreSQL, and the Google Gemini API.
 
-Unlike traditional utility bots, Katelyn is designed to simulate natural conversational behavior with a persistent personality identity and controlled interaction flow.
-
-## Core Architecture
-
-The system focuses on:
-
-- Queue-controlled conversational processing
-- Persistent private-chat memory using MongoDB
-- Stateless group-chat handling
-- Persona consistency through structured system prompts
-- Multi-key Gemini API rotation for quota distribution
-- Retry and fallback handling for API failures
+Unlike standard utility bots, Katelyn acts as a synchronized, state-aware virtual companion operating through strict architectural boundaries, a managed message processing pipeline, and dynamic multimodal input normalization.
 
 **Bot Profile:** https://t.me/kathill_bot
 
 ---
 
-# 🚀 Features
+# 🏗️ Core Architecture & System Flow
 
-- Personality-driven conversational system
-- Human-like response timing simulation
-- Queue-based request processing
-- Persistent private-chat memory
-- Group mention/reply awareness
-- Multi-key Gemini API rotation
-- Retry + delayed requeue handling
-- Express uptime server
-- Dynamic command loading
-- Media filtering support
+The application strictly separates concerns between ingestion layers, a sequential database history pipeline, a dynamic rate-limiting key router, and an image processing engine.
+
+### Queue-Controlled Processing Pipeline
+
+Guarantees FIFO execution order using zero concurrency overlaps per execution block.
+
+### Persistent Relational Ledger
+
+Managed entirely through PostgreSQL for predictable conversation memory retention, membership mappings, and usage tracking.
+
+### Multimodal Asset Normalization
+
+Intercepts visual payloads, downloads media through safe Axios connections, downscales assets using Sharp, and produces deterministic outputs through strict JSON schemas.
+
+### Distributed Multi-Account Key Balancing
+
+Interleaves outbound client requests across three separate credential accounts to reduce the likelihood of automated platform restrictions.
+
+### Self-Healing Diagnostics
+
+Performs periodic heartbeat checks to monitor database response latency and proactively broadcasts downtime alerts to active direct-message conversations.
 
 ---
 
 # 🧱 Tech Stack
 
-- Node.js
-- node-telegram-bot-api
-- Express.js
-- MongoDB (Mongoose)
-- Google Generative AI (Gemini 2.5 Flash Lite)
-- dotenv
-- node-fetch
+| Component           | Technology                    |
+| ------------------- | ----------------------------- |
+| Runtime Environment | Node.js v20+                  |
+| Bot API Controller  | node-telegram-bot-api         |
+| AI Engine           | Gemini 2.5 Flash / Flash-Lite |
+| AI SDK              | @google/genai                 |
+| Storage Engine      | PostgreSQL (`pg`)             |
+| Graphics Processing | Sharp                         |
+| HTTP Client         | Axios                         |
+| Task Scheduler      | node-cron                     |
+| Server Framework    | Express.js v5                 |
 
 ---
 
-# ⚙️ Setup
+# ⚙️ Setup & Deployment
 
-## 1. Clone repository
+## 1. Clone Repository & Install Dependencies
 
 ```bash
 git clone <repo-url>
-cd <project-folder>
-```
-
-## 2. Install dependencies
-
-```bash
+cd Katelyn
 npm install
 ```
 
-## 3. Create `.env` file
+## 2. Configure Environment Variables
+
+Create a `.env` file in the project root:
 
 ```env
-BOT_API_KEY=
+# Server Network Parameters
+PORT=5000
+BOT_URL=https://your-deployment-url.render.com
 
-GOOGLE_API_KEY1 - GOOGLE_API_KEY0
+# Telegram API Parameters
+BOT_API_KEY=1234567890:ABCdefGhIJKlmNoPQRsTUVwxyZ
 
-BOT_OWNER_ID=
-BOT_URL=
+# Google Api Parameters
+GOOGLE_API_KEY1 =  ABCdefgh-1234567890Ijkl...
+GOOGLE_API_KEY2 =  ABCdefgh-1234567890Ijkl...
+GOOGLE_API_KEY3 =  ABCdefgh-1234567890Ijkl...
+GOOGLE_API_KEY4 =  ABCdefgh-1234567890Ijkl...
+GOOGLE_API_KEY5 =  ABCdefgh-1234567890Ijkl...
 
-MONGODB_URL=
-PORT=
+# PostgreSQL Storage Connection String
+DATABASE_URL=postgres://user:password@localhost:5432/katelyn_db
 ```
 
-## 4. Run the bot
+## 3. Database Initialization
+
+Ensure the database contains the baseline health monitoring table:
+
+```sql
+CREATE TABLE IF NOT EXISTS bot_health (
+    id SERIAL PRIMARY KEY,
+    checked_at TIMESTAMP DEFAULT NOW(),
+    response_time_ms NUMERIC
+);
+```
+
+## 4. Start the Application
+
+### Production
 
 ```bash
 node index.js
 ```
 
----
+### Development
 
-# 🧪 Group Chat Behavior
-
-Katelyn responds in groups only when:
-
-- Mentioned
-- Name-triggered
-- Replied to directly
-
-### Group Rules
-
-- No persistent memory in groups
-- Stateless contextual handling
-- Reply-context injection only
-- No long-term group history storage
-
-This behavior is intentional to reduce context pollution in multi-user conversations.
+```bash
+npm run dev
+```
 
 ---
 
-# 🧵 Queue System
+# 🤖 Context & Execution Rules
 
-All incoming messages pass through a centralized processing queue.
+## ⏳ Queue Mechanics & Retry Handling
 
-### Responsibilities
+All incoming transactions enter a unified in-memory processing queue.
 
-- Maintains execution order
-- Prevents concurrent processing conflicts
-- Controls API usage
-- Handles retry scheduling
+### Priority Escalation
 
-### Retry Handling
+Messages originating from owner or administrator accounts bypass the queue by being inserted at the front of the execution pipeline using `unshift()`.
 
-- Failed requests retry up to 2 times
-- Repeated failures trigger delayed requeue
+### Delayed Requeue Circuit Breaker
 
----
+Failed API operations:
 
-# ⚠️ Operational Warning
-
-The multi-key Gemini rotation system is experimental.
-
-Excessive API-key rotation or abnormal request distribution patterns may trigger platform restrictions, quota reviews, or temporary limitations from Google.
-
-Use responsibly and monitor usage patterns carefully.
+1. Retry immediately up to **2 times**
+2. If failures persist, enter a **10-minute cooldown period**
+3. Reinsert the payload into the processing queue after cooldown
 
 ---
 
-# 📌 Contact
+# 🖼️ Multimodal Media Processing Pipeline
 
-- WhatsApp: https://wa.me/+2347054971517
-- Telegram: https://t.me/chidalumb100
-- LinkedIn: https://www.linkedin.com/in/chidalu-mbonu-94944b3ba
+When image content is received, the standard message path is bypassed.
+
+### Processing Flow
+
+1. Download the highest available resolution directly from Telegram media servers.
+2. Apply a strict **10-second request timeout**.
+3. Resize images to a maximum dimension of **1024 × 1024 pixels**.
+4. Compress output to **80% JPEG quality** using Sharp.
+5. Request a structured AI response conforming to a predefined JSON schema.
+6. Convert image understanding output into:
+
+```text
+{IMAGE_ATTACHMENT: ...}
+```
+
+7. Persist the result in PostgreSQL as plain text, ensuring compatibility with future conversation history retrieval.
+
+---
+
+# 📅 Seasonal Scheduling Engine
+
+Katelyn operates with a dynamic contextual scheduling system that modifies persona behavior according to predefined calendar rules.
+
+### Academic Schedule
+
+* Weekdays
+* Active between **09:00 – 15:00**
+
+### Service Shift Schedule
+
+* Evening shifts
+* Active between **17:00 – 20:00**
+
+### Calendar Overrides
+
+Supports:
+
+* Federal holiday tracking
+* Summer break windows
+* Winter break windows
+* Other seasonal schedule adjustments
+
+School-related contexts are automatically disabled during break periods while work-related contexts remain active.
+
+---
+
+# 📌 Maintenance & Contact
+
+### Developer
+
+**Mbonu Chidalu**
+
+### Telegram
+
+https://t.me/chidalumb100
+
+### LinkedIn
+
+Chidalu Mbonu
+
+### WhatsApp
+
+https://wa.me/2347054971517
+
+---
+
+# License
+
+This project is provided for educational and personal development purposes. Add an appropriate license before public distribution.
