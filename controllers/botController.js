@@ -66,7 +66,8 @@ async function processUserRequest(bot, currentUser) {
         // If AI produced a response, send it back
         if (aiResponse) {
             const sentMessage = await bot.sendMessage(currentUser.chatId, aiResponse, {
-                reply_to_message_id: currentUser.msgId
+                reply_to_message_id: currentUser.msgId,
+                parse_mode: 'Markdown'
             });
 
             // Persist bot response only in private chats
