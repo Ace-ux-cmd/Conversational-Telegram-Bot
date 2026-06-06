@@ -66,10 +66,15 @@ module.exports = (bot) => {
             
             let user = null;
 
+ // If they have a username, use it. If not, generate an uncollidable unique string using their ID.
+    const username = msg.from.username 
+        ? msg.from.username 
+        : `tg_user_${msg.from.id}`;
+        
             // Handle User Lookup Based on Chat Context
             if (!isGroup) {
                 // Only create/get global user records for private conversations
-                user = await createOrGet(chatId, msg.from.username, msg.from.first_name);
+                user = await createOrGet(chatId, username, msg.from.first_name);
             } else {
                 // For groups, look up the sender's existing profile by their actual sender ID (if it exists)
                 // This prevents registering a group ID inside the user table

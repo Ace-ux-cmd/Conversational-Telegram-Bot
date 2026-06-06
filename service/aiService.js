@@ -58,7 +58,7 @@ async function getAIResponse(currentUser) {
             `\n\n[Runtime Context]\n` +
             `• Target User Name: ${currentUser.username || "Anonymous"}\n` +
             `• Environmental Activity: ${scheduleContext}\n` +
-            `• Current Timestamp: ${new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" })}\n` +
+            `• Current Timestamp in california: ${new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" })}\n` +
             `• Delay Interval: +${lastDelta}s.\n` +
             `Use interval strictly to judge conversation pacing; do not copy or explicitly reference metrics in text.`+
             `• And Don't send non-text responses\n` ;

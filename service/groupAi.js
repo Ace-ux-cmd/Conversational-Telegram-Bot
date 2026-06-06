@@ -45,7 +45,7 @@ async function aiGroupResponse(currentUser) {
     systemInstructionText += 
       `\n\n[Runtime Context]\n` +
       `• Target User Name: ${currentUser.username || "Anonymous"}\n` +
-      `• Current Timestamp: ${new Date().toISOString()}\n` +
+      `• Current Timestamp in california: ${new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" })}\n` +
       `Note: This is a shared group context. Keep it short, natural, and matching your persona constraints.`;
 
     // Payload Layout Assembly: Map inline conversational history nodes
