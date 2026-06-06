@@ -12,7 +12,17 @@ const invalidKeys = require("./invalidKeys");
         process.env.GOOGLE_API_KEY7, 
         process.env.GOOGLE_API_KEY8, 
         process.env.GOOGLE_API_KEY9, 
-        process.env.GOOGLE_API_KEY0
+        process.env.GOOGLE_API_KEY0,
+        process.env.GEMINI_API_KEY1,
+        process.env.GEMINI_API_KEY2,
+        process.env.GEMINI_API_KEY3,
+        process.env.GEMINI_API_KEY4,
+        process.env.GEMINI_API_KEY5,
+        process.env.GEMINI_API_KEY6,
+        process.env.GEMINI_API_KEY7,
+        process.env.GEMINI_API_KEY8,
+        process.env.GEMINI_API_KEY9,
+        process.env.GEMINI_API_KEY0
     ].filter(Boolean); // Cleans out any missing/undefined environment variables
 
     let currentIndex = 0;

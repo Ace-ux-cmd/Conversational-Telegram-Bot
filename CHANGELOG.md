@@ -6,6 +6,9 @@ All notable changes to the Conversational Telegram Bot (Katelyn) will be documen
 
 # v2.0.0 - PostgreSQL Migration, Multimodal Support & Core Architecture Rewrite
 
+
+<img src="media/V2.0.0 Banner.jpg" alt="Katelyn v2.0 Banner" width="400"/>
+
 ## Added
 
 ### Database Layer

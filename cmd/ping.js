@@ -45,14 +45,21 @@ module.exports = (bot) => {
                 ? dailyUsage.map(u => `• User \`${u.user_id}\`: ${u.usage_count} ${u.request_type} reqs`).join("\n")
                 : "• No usage logged today.";
 
-            // 2. Format Users list into clean lines
+            // 2. Format Users list into clean lines (Global regex strip to protect parser from malicious usernames)
             const userLines = Array.isArray(allUsers) && allUsers.length > 0
-                ? allUsers.map(u => `• \`${u.id}\` - ${u.username || "Anonymous"} - ${u.first_name || "Anonymous"}`).join("\n")
+                ? allUsers.map(u => {
+                    const cleanUsername = (u.username || "Anonymous").replace(/[_*`\[\]]/g, " ");
+                    const cleanFirstName = (u.first_name || "Anonymous").replace(/[_*`\[\]]/g, " ");
+                    return `• \`${u.id}\` - ${cleanUsername} - ${cleanFirstName}`;
+                }).join("\n")
                 : "• No users found.";
 
             // 3. Format Group list into clean lines
             const groupLines = Array.isArray(allGroups) && allGroups.length > 0
-                ? allGroups.map(g => `• \`${g.id}\` - ${g.name|| g.group_name || "Unknown Group"}`).join("\n")
+                ? allGroups.map(g => {
+                    const cleanGroupName = (g.name || g.group_name || "Unknown Group").replace(/[_*`\[\]]/g, " ");
+                    return `• \`${g.id}\` - ${cleanGroupName}`;
+                }).join("\n")
                 : "• No groups tracked.";
 
             // 4. Format health List into clean lines
@@ -60,19 +67,24 @@ module.exports = (bot) => {
                 ? healthStatus.map(h => `• \`${h.checked_at}\` : ${h.response_time_ms}ms`).join("\n")
                 : "• No ping tracked.";
 
-            // 5. Format Ai request List into clean lines
+            // 5. Format Ai request List into clean lines (Replaced single matching swaps with clean global regex sweeps)
             const requestLogs = Array.isArray(totalAiRequests) && totalAiRequests.length > 0
-                ? totalAiRequests.map(h => `• \`${h.chat_type}\` : Request: ${h.request_type.replace("_", " ")} - Result: ${h.result} - Error: ${h.error_message?.replace("_", " ")}`).join("\n")
+                ? totalAiRequests.map(h => {
+                    const safeReqType = String(h.request_type || "unknown").replace(/[_*`\[\]]/g, " ");
+                    const safeRes = String(h.result || "unknown").replace(/[_*`\[\]]/g, " ");
+                    const safeError = String(h.error_message || "None").replace(/[_*`\[\]]/g, " ");
+                    return `• \`${h.chat_type}\` : Request: ${safeReqType} - Result: ${safeRes} - Error: ${safeError}`;
+                }).join("\n")
                 : "• No request tracked.";
 
             const dashboard = 
                 `📊 *SYSTEM DIAGNOSTICS PING*\n\n` +
                 `⏰ **Uptime:** Since ${uptime}\n\n` +
-                `🟢 **Bot Health:** ${localizedHealth}\n` +
+                `🟢 **Bot Health:**\n${localizedHealth}\n` +
                 `⚡ **Response Latency:** ${responseTime}ms\n\n` +
-                `👥 **Total Users:** \n${usersCount}\n` +
+                `👥 **Total Users:** \n${usersCount}\n\n` +
                 `🏢 **Total Groups:** ${groupsCount}\n\n` +
-                `📈 **Lifetime AI Requests:** \n${requestLogs}\n` +
+                `📈 **Lifetime AI Requests:** \n${requestLogs}\n\n` +
                 `🤖 **Total Commands Available:** ${cmdDir.length}\n\n` +
                 `📊 **Daily AI API Usage:**\n${usageLines}\n\n` +
                 `👤 **Users List:**\n${userLines}\n\n` +
@@ -80,7 +92,6 @@ module.exports = (bot) => {
 
             await bot.sendMessage(chatId, dashboard, { parse_mode: "Markdown" });
 
-            
         } catch (err) {
             console.error("Ping diagnostics failed:", err.message);
             bot.sendMessage(chatId, "❌ Failed to complete system diagnostic metrics fetch.");

@@ -1,8 +1,5 @@
 # Conversational Telegram Bot (Katelyn)
 
-<img src="media/V2.0.0 Banner.jpg" alt="Katelyn v2.0 Banner" width="600"/>
-
-
 Katelyn is a highly disciplined, personality-driven Telegram chatbot built on Node.js, PostgreSQL, and the Google Gemini API.
 
 Unlike standard utility bots, Katelyn acts as a synchronized, state-aware virtual companion operating through strict architectural boundaries, a managed message processing pipeline, and dynamic multimodal input normalization.
