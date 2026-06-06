@@ -191,7 +191,7 @@ https://t.me/chidalumb100
 
 ### LinkedIn
 
-Chidalu Mbonu
+https://www.linkedin.com/in/chidalu-mbonu-94944b3ba?utm_source=share_via&utm_content=profile&utm_medium=member_android
 
 ### WhatsApp
 
