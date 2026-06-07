@@ -7,7 +7,7 @@ const pool = new Pool({
     },
     connectionTimeoutMillis: 30000,
     idleTimeoutMillis: 20000,
-    max: 3
+    max: 10
 })
 
 pool.on("connect", ()=> console.log("Sql connected"));
