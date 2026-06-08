@@ -13,7 +13,7 @@ const activity = require("../utils/activity");
 const { getById } = require("../models/userModel"); 
 const { trackFailedMessage } = require("../utils/rateLimitQueue");
 
-async function getAIResponse(currentUser) {
+async function getAIResponse(currentUser, bot) {
     // Declare outside block scope to guarantee catch block accessibility during runtime failures
     let assignedKey = null;
 
