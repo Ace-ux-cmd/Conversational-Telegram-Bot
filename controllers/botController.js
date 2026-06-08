@@ -58,7 +58,7 @@ async function processUserRequest(bot, currentUser) {
                 currentUser.message
             );
 
-            aiResponse = await getAIResponse(currentUser);
+            aiResponse = await getAIResponse(currentUser, bot);
         } else {
             aiResponse = await aiGroupResponse(currentUser);
         }
