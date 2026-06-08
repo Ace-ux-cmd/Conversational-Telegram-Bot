@@ -11,8 +11,8 @@ function trackFailedMessage(userId, botInstance, msgObject) {
 
     // Save the context frame needed to send the message when the timer expires
     failedQueueMap.set(userId, {
-        chatId: msgObject.chat.id || msgObject.chatId,
-        messageId: msgObject.message_id || msgObject.msgId
+        chatId: msgObject.chatId,
+        messageId: msgObject.msgId
     });
 
     // Establish a precise 60-minute automated notification callback loop
