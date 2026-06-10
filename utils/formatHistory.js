@@ -1,4 +1,6 @@
-  // Module to format db messages into expected gemini structure
+// FUNCTION TO FORMAT DB MESSAGES INTO GEMINI STRUCTURE
+
+
   module.exports = (rows) => {
 
     return rows.map(row => ({

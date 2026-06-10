@@ -1,3 +1,6 @@
+// MODULE FOR SELF PING (SPECIFICALLY MADE FOR FREE HOSTED SERVICES)
+
+
 // Import saveHealth to store ping and db response time
 const { saveHealth } = require("../models/botHealthModel");
 const { getUsers } = require("../models/userModel");

@@ -1,4 +1,6 @@
-// core message pipeline that connects Telegram → queue → AI engine
+// MODULE FOR MESSAGE QUEUEING AND HANDLING (pipeline that connects Telegram → queue → AI engine)
+
+
 const { processUserRequest } = require("./botController");
 const { handleImageMessage } = require("./imageController");
 
@@ -80,6 +82,10 @@ module.exports = (bot) => {
                 // This prevents registering a group ID inside the user table
                 user = await getById(msg.from.id);
             }
+                    // Stop processing if the account is currently marked as banned
+                    if (user?.status === "banned") {
+                        return "yeah i'm not supposed be talking to you rn. if you think this is a mistake, type /callad and sort it out.";
+                    }
 
             // --- MULTIMODAL PHOTOGRAPHIC INTERCEPT BLOCK ---
             if (msg.photo) {

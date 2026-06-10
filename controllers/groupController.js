@@ -1,3 +1,6 @@
+// MODULE FOR GROUP EVENTS HANDLING
+
+
 const fs = require("fs");
 const path = require("path");
 const { saveGroup, deleteGroup } = require("../models/groupsModel");

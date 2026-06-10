@@ -1,14 +1,17 @@
+// MODULE FOR BOT REPLY HANDLING
+
+
 // Import AI response services for private and group chats
 const { getAIResponse } = require("../service/aiService");
 const { aiGroupResponse } = require("../service/groupAi");
 const { saveMessage } = require("../models/messagesModel");
 const { updateGroupInteraction } = require("../models/groupsModel");
 const { updateUserInteraction } = require("../models/userModel");
+const { trackFailedMessage } = require("../utils/rateLimitTracker");
+const fallbackConfig = require("../config/fallback.json");
 const activity = require("../utils/activity"); 
 
-
-//  Calculates a proper random delay between min and max seconds inclusive
-
+// Calculates a proper random delay between min and max seconds inclusive
 const getRandomDelay = () => {
     let min;
     let max;
@@ -63,8 +66,37 @@ async function processUserRequest(bot, currentUser) {
             aiResponse = await aiGroupResponse(currentUser);
         }
 
-        // If AI produced a response, send it back
-        if (aiResponse) {
+        // Intercept structured error signatures coming from the AI generation engines
+       if (aiResponse && aiResponse.success === false) {
+            currentUser.retries = (currentUser.retries || 0) + 1;
+
+            // GATE A: Return context straight back to runQueue for immediate rotation or 10-min retry hold
+            if (currentUser.retries <= 2) {
+                return currentUser;
+            }
+
+            // GATE B: The 10-minute retry attempt has failed. Escalating to 1-Hour Roommate Map.
+            let selectionPool = fallbackConfig.roommateReplies.serviceDown;
+            if (aiResponse.errorType === "429") {
+                selectionPool = fallbackConfig.roommateReplies.rateLimited;
+            }
+
+            // Dynamically select a random roommate excuse from the config pool
+            const dynamicReply = selectionPool[Math.floor(Math.random() * selectionPool.length)];
+
+            // Register the context into the 1-hour map tracking layer
+            trackFailedMessage(currentUser.userId, bot, currentUser);
+
+            // Deliver the roommate response directly through her phone stream
+            await bot.sendMessage(currentUser.chatId, dynamicReply, {
+                reply_to_message_id: currentUser.msgId
+            }).catch((e) => console.error("Failed to deliver roommate fallback notice:", e.message));
+
+            return null;
+        }
+
+        // If AI produced a valid textual response, process delivery and logging
+        if (aiResponse && typeof aiResponse === "string") {
             const sentMessage = await bot.sendMessage(currentUser.chatId, aiResponse, {
                 reply_to_message_id: currentUser.msgId,
                 parse_mode: 'Markdown'
@@ -81,40 +113,31 @@ async function processUserRequest(bot, currentUser) {
                 );
                 await updateUserInteraction(currentUser.userId);
             } else {
-                updateGroupInteraction(recipientId);
+               await updateGroupInteraction(recipientId);
             }
 
-            return;
+            return null;
         }
-
-        // Retry logic when AI fails
-        if (currentUser.retries <= 3) {
-            currentUser.retries = (currentUser.retries || 0) + 1;
-            return currentUser;
-        }
-
-        // Final fallback after repeated failures
-        await bot.sendMessage(
-            currentUser.chatId,
-            `Sorry, I'm slammed rn and have no time for chats 😩🫠
-                Anyways, don't bother replying, I'll be back soon.
-                Keep it chill till then.`,
-            {
-                reply_to_message_id: currentUser.msgId
-            }
-        );
 
     } catch (err) {
-        // Central failure handler for unexpected runtime issues
-        console.error("processUserRequest failed:", err);
-
+        console.error("Central processing pipeline critical failure:", err);
+        
         try {
-            await bot.sendMessage(
-                currentUser.chatId || currentUser.userId,
-               "Sorry, I'm a bit overloaded right now. Try again later."
-            );
+            if (currentUser.retries > 2) {
+                
+                // Safeguard randomized selection for unexpected structural engine drops
+                const emergencyPool = fallbackConfig.roommateReplies.serviceDown;
+                const dynamicFallback = emergencyPool[Math.floor(Math.random() * emergencyPool.length)];
+                
+                trackFailedMessage(currentUser.userId, bot, currentUser);
+                await bot.sendMessage(currentUser.chatId, dynamicFallback, { reply_to_message_id: currentUser.msgId });
+                return null;
+            }
+            currentUser.retries = (currentUser.retries || 0) + 1;
+            return currentUser;
         } catch (sendErr) {
-            console.error("Failed to send error message:", sendErr);
+            console.error("Failed executing automated crash defense fallback:", sendErr);
+            return null;
         }
     }
 }

@@ -1,3 +1,6 @@
+// MODULE FOR AI RESPONSE GENERATION (GROUP)
+
+
 const { GoogleGenAI } = require("@google/genai");
 
 // Behavioral configurations based on user status
@@ -81,7 +84,7 @@ async function aiGroupResponse(currentUser) {
 
     // Complete generation call using the updated SDK standards
     const responseWrapper = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-flash-lite",
       contents: contentPayload,
       config: {
         systemInstruction: systemInstructionText

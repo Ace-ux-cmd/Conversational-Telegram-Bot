@@ -1,3 +1,6 @@
+// FUNCTION TO SET DELTA TIME(LENGTH BETWEEN INTERACTIONS)
+
+
 module.exports = (rows) => {
   if (!rows || rows.length < 2) return 0;
 

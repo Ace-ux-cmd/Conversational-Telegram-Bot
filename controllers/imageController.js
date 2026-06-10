@@ -1,3 +1,6 @@
+// MODULE FOR IMAGE PROCESSING HANDING
+
+
 const { prepareImageForGemini } = require("../utils/imageBuffer");
 const { generateImageAnalysis } = require("../service/imageService");
 

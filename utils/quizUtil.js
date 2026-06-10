@@ -1,4 +1,7 @@
-const { v4: uuidv4 } = require('uuid'); // Install uuid via npm: npm install uuid
+// MODULE FOR QUIZ SETUP
+
+
+const { v4: uuidv4 } = require('uuid');
 
 function decodeHTMLEntities(text) {
     return text

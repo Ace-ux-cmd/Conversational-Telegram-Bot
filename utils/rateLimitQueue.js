@@ -1,3 +1,6 @@
+// MODULE TO STORE USERS AFTER MULTIPLE REPLY FAILURES
+
+
 // Primary memory engine holding isolated data rows matching [userId] -> [msgObject]
 const failedQueueMap = new Map();
 

@@ -1,3 +1,6 @@
+// MODULE FOR AI RESPONSE GENERATION (IMAGE)
+
+
 const { GoogleGenAI } = require('@google/genai');
 const getRandomKey = require("../utils/keyRotation");
 const { defaultConfig, adminConfig, ownerConfig } = require("../config/instruction");

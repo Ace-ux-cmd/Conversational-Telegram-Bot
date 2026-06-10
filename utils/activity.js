@@ -1,4 +1,5 @@
-// Module to set bot schedule with breaks and holiday overrides
+//  MODULE TO SET BOT SCHEDULE (INCLUDING BREAKS & HOLIDAY OVERIDES)
+
 
 // Hardcoded holiday configurations (Format: 'MM-DD')
 const HOLIDAYS = [

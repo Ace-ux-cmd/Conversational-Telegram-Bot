@@ -1,3 +1,6 @@
+// MODULE TO REMODEL IMAGES FOR GEMINI PARSING
+
+
 const axios = require('axios');
 const sharp = require('sharp');
 

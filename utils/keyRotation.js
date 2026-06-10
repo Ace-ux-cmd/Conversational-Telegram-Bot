@@ -1,3 +1,6 @@
+// FUNCTION TO SELECT VALID KEYS FOR RESPONSE
+
+
 //  Require invalidKeys map from external module
 const invalidKeys = require("./invalidKeys");
 

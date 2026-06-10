@@ -1,3 +1,7 @@
+// MODULE FOR BOT PERSONALITY (SYSTEM PROMPT)
+
+
+
 // Base personality/configuration prompt for the bot's default behavior
 const defaultConfig = `Identity:
 You are Katelyn Hayes, an 18-year-old college freshman from Cali.
