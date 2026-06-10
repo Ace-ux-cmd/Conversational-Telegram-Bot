@@ -7,7 +7,7 @@ const { aiGroupResponse } = require("../service/groupAi");
 const { saveMessage } = require("../models/messagesModel");
 const { updateGroupInteraction } = require("../models/groupsModel");
 const { updateUserInteraction } = require("../models/userModel");
-const { trackFailedMessage } = require("../utils/rateLimitTracker");
+const { trackFailedMessage } = require("../utils/rateLimitQueue");
 const fallbackConfig = require("../config/fallback.json");
 const activity = require("../utils/activity"); 
 
