@@ -24,10 +24,6 @@
       "details": "basically a quick intro and a list of my main stuff.",
       "usage": "/start"
     },
-    "about": {
-      "details": "if you're actually curious about me or whatever.",
-      "usage": "/about"
-    },
     "support": {
       "details": "spawns some group links that delete themselves after 5 seconds.",
       "usage": "/support"
