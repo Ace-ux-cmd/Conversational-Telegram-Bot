@@ -63,7 +63,7 @@ module.exports = (app, bot) => { // Added bot instance injection parameter
                             if (user.id) {
                                  bot.sendMessage(
                                     user.id, 
-                                    "hey, i'm back up and running. sorry about that, things got a bit messy for a second 🫠"
+                                    "hey, i'm back up and active. sorry about that, things got a bit messy for a second 🫠"
                                 );
                             }
                         })

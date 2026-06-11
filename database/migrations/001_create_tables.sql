@@ -38,10 +38,10 @@ CREATE TABLE IF NOT EXISTS ai_requests(
     id SERIAL PRIMARY KEY,
     chat_id BIGINT NOT NULL,
     chat_type TEXT CHECK (chat_type IN ('private', 'group', 'supergroup')),
-    request_type TEXT CHECK (request_type IN ('text_gen', 'image_gen', 'audio_gen', 'image_read', 'voice_listen')),
+    request_type TEXT CHECK (request_type IN ( 'image_gen', 'audio_gen', 'image_read', 'voice_listen')),
     result TEXT CHECK (result IN ('success', 'fail')),
     error_message TEXT, --null for successful queries
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NO()
 );
 
 CREATE TABLE IF NOT EXISTS bot_health(
@@ -51,7 +51,6 @@ CREATE TABLE IF NOT EXISTS bot_health(
 );
 
 CREATE TABLE IF NOT EXISTS messages(
-    id SERIAL PRIMARY KEY,
     message_id BIGINT, --Telegram message ID
     user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
     role TEXT CHECK (role IN ('user', 'model')),
@@ -66,4 +65,4 @@ CREATE TABLE IF NOT EXISTS daily_usage (
     request_type TEXT NOT NULL,
     usage_count INTEGER NOT NULL DEFAULT 1,
     PRIMARY KEY (user_id, usage_date, request_type)
-);
+);W

@@ -17,8 +17,8 @@ async function saveMessage( messageId, userId, role, content, replyToMessageId =
         await client.query(`
     DELETE FROM messages
     WHERE user_id = $1
-    AND id NOT IN (
-        SELECT id FROM messages
+    AND message_id NOT IN (
+        SELECT message_id FROM messages
         WHERE user_id = $1
         ORDER BY created_at DESC
         LIMIT 20
