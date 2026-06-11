@@ -65,4 +65,4 @@ CREATE TABLE IF NOT EXISTS daily_usage (
     request_type TEXT NOT NULL,
     usage_count INTEGER NOT NULL DEFAULT 1,
     PRIMARY KEY (user_id, usage_date, request_type)
-);W
+);
