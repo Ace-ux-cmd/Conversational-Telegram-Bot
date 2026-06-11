@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS ai_requests(
     request_type TEXT CHECK (request_type IN ( 'image_gen', 'audio_gen', 'image_read', 'voice_listen')),
     result TEXT CHECK (result IN ('success', 'fail')),
     error_message TEXT, --null for successful queries
-    created_at TIMESTAMP DEFAULT NO()
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS bot_health(
