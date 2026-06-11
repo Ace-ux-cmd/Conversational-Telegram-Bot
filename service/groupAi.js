@@ -84,7 +84,7 @@ async function aiGroupResponse(currentUser) {
 
     // Complete generation call using the updated SDK standards
     const responseWrapper = await ai.models.generateContent({
-      model: "gemini-2.5-flash-lite",
+      model: "gemini-2.5-flash",
       contents: contentPayload,
       config: {
         systemInstruction: systemInstructionText
