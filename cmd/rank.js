@@ -28,20 +28,23 @@ module.exports = (bot) => {
       const displayPosition = position !== -1 ? position + 1 : "Not ranked";
 
       // HTML preformatted string template with structural padding layout columns aligned
-      const message = `🏆 <b>LEADERBOARD</b> 🏆
+      const message = `🏆 <b>LEADERBOARD</b> 🏆\n\n<pre>\nPOS ID          USERNAME        FIRSTNAME       SCORE\n-----------------------------------------------------\n${leaderboard || "No data available in leaderboard yet."}\n</pre>\n\nYour position: <b>${displayPosition}</b>\n\n<i>⏳ This message will self-destruct in 30 seconds.</i>`;
 
-<pre>
-POS ID          USERNAME        FIRSTNAME       SCORE
------------------------------------------------------
-${leaderboard || "No data available in leaderboard yet."}
-</pre>
-
-Your position: <b>${displayPosition}</b>`;
-
-      await bot.sendMessage(chatId, message, {
+      // 1. Capture the sent message payload object
+      const sentMessage = await bot.sendMessage(chatId, message, {
         parse_mode: "HTML",
         reply_to_message_id: msg.message_id,
       });
+
+      // 2. Set the 30-second execution countdown worker
+      setTimeout(async () => {
+        try {
+          await bot.deleteMessage(chatId, sentMessage.message_id);
+        } catch (deleteErr) {
+          // Gracefully handle scenarios where users delete it manually first
+          console.log(`Auto-delete skipped: Message already removed or missing permission.`);
+        }
+      }, 30 * 1000);
 
     } catch (err) {
       console.error("Error in rank command:", err.message);

@@ -80,15 +80,15 @@ module.exports = (bot) => {
             const dashboard = 
                 `📊 *SYSTEM DIAGNOSTICS PING*\n\n` +
                 `⏰ **Uptime:** Since ${uptime}\n\n` +
-                `🟢 **Bot Health:**\n${localizedHealth}\n` +
-                `⚡ **Response Latency:** ${responseTime}ms\n\n` +
-                `👥 **Total Users:** \n${usersCount}\n\n` +
-                `🏢 **Total Groups:** ${groupsCount}\n\n` +
-                `📈 **Lifetime AI Requests:** \n${requestLogs}\n\n` +
                 `🤖 **Total Commands Available:** ${cmdDir.length}\n\n` +
-                `📊 **Daily AI API Usage:**\n${usageLines}\n\n` +
+                `🟢 **Bot Health:**\n${localizedHealth}\n\n` +
+                `👥 **Total Users:** \n${usersCount}\n\n` +
                 `👤 **Users List:**\n${userLines}\n\n` +
-                `💬 **Groups List:**\n${groupLines}`;
+                `🏢 **Total Groups:** ${groupsCount}\n\n` +
+                `💬 **Groups List:**\n${groupLines}\n\n`+
+                `📈 **Lifetime AI Requests:** \n${requestLogs}\n\n` +
+                `📊 **Daily AI API Usage:**\n${usageLines}\n\n`+
+                `⚡ **Response Latency:** ${responseTime}ms\n\n`  ;
 
             await bot.sendMessage(chatId, dashboard, { parse_mode: "Markdown" });
 
@@ -98,7 +98,7 @@ module.exports = (bot) => {
         }
     });
 
-    // 2. Global Callback Handler for non-owners trying to click the status button
+    // Global Callback Handler for non-owners trying to click the status button
     bot.on("callback_query", async (query) => {
         if (query.data !== "ping_alert") return;
 

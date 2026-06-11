@@ -17,7 +17,8 @@ module.exports = (bot) => {
                 `📌 **Quick Navigation Commands:**\n` +
                 `• /help — Get full command list\n` +
                 `• /support — Get the official link to join our support group.\n` +
-                `• /callad — Ping an admin immediately if something breaks or you just want to say hi.\n\n`;
+                `• /callad — Ping an admin immediately if something breaks or you just want to say hi.\n\n` +
+                `*ALso don't forget to climb up the leaderboard to get exclusive admin previledges.*\n\n`;
 
             // Deliver the structured guide first
             await bot.sendMessage(chatId, userGuide, { parse_mode: "Markdown", disable_web_page_preview: false });

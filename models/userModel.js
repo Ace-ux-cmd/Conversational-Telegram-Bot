@@ -90,7 +90,7 @@ async function deleteInactive(){
            DELETE FROM users 
            WHERE id NOT IN(
            SELECT DISTINCT user_id FROM messages
-           WHERE last_interacted > NOW() - INTERVAL '90 days'
+           WHERE last_interacted > NOW() - INTERVAL '62 days'
            )
             `
         );
@@ -117,6 +117,20 @@ async function updateRole(id, role){
         throw new Error (`Error occured while user's role ${error.message}`
     )}
 }
+async function deleteUser(id){
+    try {
+        await pool.query(`
+          DELETE FROM users
+          WHERE id = $1
+            `,
+            [id]
+        );
+
+    } catch (error) {
+        throw new Error (`Error occured removing 1 user ${error.message}`
+    )}
+}
+
 
 // count current users
 async function countUsers(){
@@ -157,5 +171,6 @@ module.exports = {
     getById,
     getUsers,
     deleteInactive,
+    deleteUser,
     updateUserInteraction
 }

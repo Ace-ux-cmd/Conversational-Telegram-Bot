@@ -36,7 +36,7 @@ async function generateImageAnalysis(userId, username, promptText, structuralIma
 
         // Execute dynamic request targeting structured output constraints
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-2.5-flash-lite',
             contents: [
                 { text: `User request/caption context: ${standardPrompt}` },
                 structuralImagePart
