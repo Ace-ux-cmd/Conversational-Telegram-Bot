@@ -201,4 +201,4 @@ https://wa.me/2347054971517
 
 # License
 
-This project is provided for educational and personal development purposes. Add an appropriate license before public distribution.
+This project is provided for educational and personal development purposes. Please view license page for more info
