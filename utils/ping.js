@@ -47,7 +47,7 @@ module.exports = (app, bot) => { // Added bot instance injection parameter
             if (lastRecord) {
                 const lastPingTime = new Date(lastRecord.checked_at);
                 const differenceMs = now.getTime() - lastPingTime.getTime();
-                const thresholdMs = 15 * 60 * 1000; // 15-minute maximum boundary window
+                const thresholdMs = 20 * 60 * 1000; // 20-minute maximum boundary window
 
                 // 2. Trigger broadcast loop if downtime validation rules pass
                 if (differenceMs > thresholdMs) {
