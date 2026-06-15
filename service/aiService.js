@@ -56,7 +56,7 @@ async function getAIResponse(currentUser, bot) {
             `\n\n[Runtime Context]\n` +
             `• Target User Name: ${currentUser.username || "Anonymous"}\n` +
             `• Environmental Activity: ${scheduleContext}\n` +
-            `• Current Timestamp in california: ${new Date().toLocaleString("en-US", { 
+            `• The current time is ${new Date().toLocaleString("en-US", { 
     timeZone: "America/Los_Angeles",
     weekday: "long",
     year: "numeric",
