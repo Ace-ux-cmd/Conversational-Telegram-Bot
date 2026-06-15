@@ -168,7 +168,7 @@ module.exports = (bot) => {
         } catch (err) {
             console.error("Message handler crashed:", err);
             try {
-                await bot.sendMessage(msg.chat.id, "Sorry, couldn't process that message correctly.");
+                await bot.sendMessage(msg.chat.id, "Sorry, my head's aching, couldn't process that message correctly.");
             } catch (_) {
                 // ignore secondary failure
             }

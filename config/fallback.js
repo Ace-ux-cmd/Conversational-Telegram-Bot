@@ -1,6 +1,7 @@
-{
-  "roommateReplies": {
-    "rateLimited": [
+// MODULE TO HANDLE DYNAMIC AI ERROR FALLBACK
+
+
+    const rateLimited = [
       "omg stop blowing up her phone lol. this is her roommate, she's trying to clean our room and her notifications won't stop vibrating. give her an hour",
       "kate is currently staring at the wall wearing noise-canceling headphones. she is completely zoned out rn. i'll make sure she replies when she's human again",
       "yo, could u chill for a sec? kate's trying to study and she literally threw her phone across the room at me to make the buzzing stop. check back in an hour",
@@ -21,8 +22,9 @@
       "hi roommate here. she's on the dorm roof with her journal right now. she goes up there when she needs to reset. no phone allowed apparently. she'll be back",
       "not kate. she's been staring at her laptop screen for like 20 minutes without typing anything. she's not texting anyone when she gets like this trust me. give her time",
       "her roommate here. kate declared a 'people detox' about 45 minutes ago and has been lying on her floor listening to music since. i'll poke her when she looks alive again"
-    ],
-    "serviceDown": [
+    ];
+
+   const serviceDown = [
       "hey, this is her roommate. kate passed out at her desk studying like an hour ago. i'm not waking her up, she looks stressed. i'll tell her to check her phone when she wakes up",
       "uh hi, kate left her phone on the kitchen counter while she went down to the laundry room. i'll tell her u messaged whenever she gets back",
       "hi, kate's roommate here. she ran out to the corner store real quick and left her phone charging on my desk. i'll let her know u texted when she gets back",
@@ -44,5 +46,8 @@
       "hi, her roommate. kate's taking a nap before her evening shift and i'm not about to be the one who wakes her up. she needs it honestly. she'll text u after her shift",
       "yo not kate. she ran to the campus store to print something for class and left her phone on the bed. should be back pretty soon, i'll let her know u texted"
     ]
-  }
-}
+
+    module.exports = {
+    rateLimited,
+    serviceDown
+    }

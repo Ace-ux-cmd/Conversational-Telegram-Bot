@@ -7,8 +7,8 @@ const { aiGroupResponse } = require("../service/groupAi");
 const { saveMessage } = require("../models/messagesModel");
 const { updateGroupInteraction } = require("../models/groupsModel");
 const { updateUserInteraction } = require("../models/userModel");
+const { rateLimited, serviceDown} = require("../config/fallback.js");
 const { trackFailedMessage } = require("../utils/rateLimitQueue");
-const fallbackConfig = require("../config/fallback.json");
 const activity = require("../utils/activity"); 
 
 // Calculates a proper random delay between min and max seconds inclusive
@@ -76,9 +76,9 @@ async function processUserRequest(bot, currentUser) {
             }
 
             // GATE B: The 10-minute retry attempt has failed. Escalating to 1-Hour Roommate Map.
-            let selectionPool = fallbackConfig.roommateReplies.serviceDown;
+            let selectionPool = serviceDown;
             if (aiResponse.errorType === "429") {
-                selectionPool = fallbackConfig.roommateReplies.rateLimited;
+                selectionPool = rateLimited;
             }
 
             // Dynamically select a random roommate excuse from the config pool
