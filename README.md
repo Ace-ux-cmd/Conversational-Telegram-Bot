@@ -80,8 +80,7 @@ GOOGLE_API_KEY4 =  ABCdefgh-1234567890Ijkl...
 GOOGLE_API_KEY5 =  ABCdefgh-1234567890Ijkl...
 
 # PostgreSQL Storage Connection String
-DATABASE_URL=postgres://user:password@localhost:5432/katelyn_db
-```
+DATABASE_URL=postgresql://[username]:[password]@[host]:[port]/[database_name]? [options]
 
 ## 3. Database Initialization
 
