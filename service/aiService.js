@@ -69,7 +69,9 @@ async function getAIResponse(currentUser, bot) {
                 `• Keep it conversational, informal, and perfectly natural.\n` +
                 `• DO NOT include any trailing emotion tags, meta-brackets, or text descriptors like "[emotion: ...]" anywhere in your response. Output clean spoken text only.`;
                 bot.sendChatAction(currentUser.chatId, "record_voice");
-        } 
+        } else
+            bot.sendChatAction(currentUser.chatId, "typing");
+        
         
         const responseWrapper = await ai.models.generateContent({
             model: 'gemini-3.1-flash-lite',
