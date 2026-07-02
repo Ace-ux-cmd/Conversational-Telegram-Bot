@@ -1,6 +1,5 @@
-# Katelyn
+# Overview 
 
-<img src="media/V2.0.0 Banner.jpg" alt="Katelyn Banner" width="500"/>
 
 **Katelyn** is a personality-driven AI companion for Telegram. More than just another chatbot, she's designed to feel engaging, expressive, and enjoyable to talk to—whether you're chatting one-on-one, sending photos, sharing voice messages, or hanging out in a group.
 
