@@ -13,12 +13,12 @@ async function saveHealth(time) {
         );
 
         await client.query(`
-        DELETE FROM bot_health
-        WHERE (id) NOT IN(
+            DELETE FROM bot_health
+        WHERE id NOT IN(
         SELECT id FROM bot_health
-        WHERE checked_at > NOW() - INTERVAL '1 hour'
-        )    
-            `)
+        ORDER BY checked_at
+        DESC LIMIT 1
+        )  `)
 await client.query(`COMMIT`);
 
     } catch (e) {

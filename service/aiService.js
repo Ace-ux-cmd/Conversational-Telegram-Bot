@@ -1,12 +1,10 @@
-// MODULE FOR AI RESPONSE GENERATION (PRIVATE)
+// MODULE FOR AI RESPONSE GENERATION
 
 
 const { GoogleGenAI } = require("@google/genai");
-
-// Trailing behavioral configurations based on user status tier matrices
 const { defaultConfig, adminConfig, ownerConfig } = require("../config/instruction");
+const { generateVoiceFromText } = require("./voiceService");
 
-// Core infrastructural dependencies and load balancing utility hooks
 const getRandomKey = require("../utils/keyRotation"); 
 const invalidKeys = require("../utils/invalidKeys"); 
 const { getHistory } = require("../models/messagesModel"); 
@@ -14,35 +12,35 @@ const formatHistory = require("../utils/formatHistory");
 const deltaSeconds = require("../utils/deltaSeconds"); 
 const activity = require("../utils/activity"); 
 const { getById } = require("../models/userModel"); 
-const { trackFailedMessage } = require("../utils/rateLimitQueue");
 
 async function getAIResponse(currentUser, bot) {
-    // Declare outside block scope to guarantee catch block accessibility during runtime failures
     let assignedKey = null;
 
     try {
-        // Fetch complete profile metrics from storage engine
         const user = await getById(currentUser.userId);
+        const userRole = user?.role || 'user';
 
-        // Pull an active key string from rotation array
         assignedKey = await getRandomKey();
         if (!assignedKey) {
             throw new Error("No operational API keys available in execution rotation array.");
         }
 
-        // Initialize unified client instance matching the latest @google/genai SDK specifications
-        const ai = new GoogleGenAI({ apiKey: assignedKey });
+        currentUser.assignedKey = assignedKey;
 
-        // Compile situational background state metrics
+        const ai = new GoogleGenAI({ apiKey: assignedKey });
         const scheduleContext = activity();
         const messageHistory = await getHistory(currentUser.userId).catch(() => []);
-        const messages = formatHistory(messageHistory);
+        
+        let messages = formatHistory(messageHistory);
         const lastDelta = deltaSeconds(messageHistory);
 
-        // Assemble base target identity text rule configuration lines
+
+        //  DETERMINISTIC ROUTING: Decide message type before generating content
+        const shouldVoiceNote = Math.random() < 0.15 && currentUser.chatType === "private";
+
         let systemInstructionText = defaultConfig;
 
-        switch (user?.role) {
+        switch (userRole) {
             case "owner":
                 systemInstructionText += ownerConfig;
                 break;
@@ -51,54 +49,77 @@ async function getAIResponse(currentUser, bot) {
                 break;
         }
 
-        // Append real-time metadata constraints dynamically to focus performance metrics
         systemInstructionText += 
             `\n\n[Runtime Context]\n` +
             `• Target User Name: ${currentUser.username || "Anonymous"}\n` +
             `• Environmental Activity: ${scheduleContext}\n` +
             `• The current time is ${new Date().toLocaleString("en-US", { 
-    timeZone: "America/Los_Angeles",
-    weekday: "long",
-    year: "numeric",
-    month: "long", 
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric"
-})}\n` +
+                timeZone: "America/Los_Angeles",
+                weekday: "long", year: "numeric", month: "long", day: "numeric",
+                hour: "numeric", minute: "numeric"
+            })}\n` +
             `• Delay Interval: +${lastDelta}s.\n` +
-            `Use interval strictly to judge conversation pacing; do not copy or explicitly reference metrics in text.`+
-            `• And Don't send non-text responses\n` ;
+            `Use interval strictly to judge conversation pacing; do not copy or explicitly reference metrics in text.`;
 
-        // Complete generation call using the updated SDK standards
+        //  CONTEXT INJECTION: Give clear formatting rules based on the chosen modality
+        if (shouldVoiceNote) {
+            systemInstructionText += 
+                `\n\n[MODALITY CRITICAL INSTRUCTION: VOICE OUTPUT]\n` +
+                `• You are responding via a spoken audio note. Write your entire response as a direct transcript of what you will say.\n` +
+                `• Keep it conversational, informal, and perfectly natural.\n` +
+                `• DO NOT include any trailing emotion tags, meta-brackets, or text descriptors like "[emotion: ...]" anywhere in your response. Output clean spoken text only.`;
+                bot.sendChatAction(currentUser.chatId, "record_voice");
+        } 
+        
         const responseWrapper = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3.1-flash-lite',
             contents: messages,
             config: {
                 systemInstruction: systemInstructionText
             }
         });
 
-        // Resolve text block output from the finalized schema response wrapper object
-        const aiResponse = responseWrapper.text;
-        return aiResponse || null;
+        let rawAiResponse = responseWrapper.text;
+        if (!rawAiResponse) return null;
 
-   } catch (err) {
-    console.error("AI Generation Core Service Engine Exception:", err.message);
+        // EXECUTION PIPELINE: Route the final clean payload text appropriately
+        if (shouldVoiceNote) {
+            console.log(`[Voice Note Selected] Generating audio output context via key rotation for User: ${currentUser.userId}`);
+            
+            // Pass the clean, non-tagged textual spoken response into the TTS module
+            const audioPayloadBuffer = await generateVoiceFromText(rawAiResponse.trim(), assignedKey, userRole, currentUser);
+            
+            return {
+                success: true,
+                type: "voice",
+                payload: audioPayloadBuffer,
+                transcript: rawAiResponse.trim()
+            };
+        }
 
-    const errorStatusCode = err.status || err.statusCode || (err.response ? err.response.status : null);
-    
-    // Check for explicit 429 status or Google SDK resource exhaustion strings
-    const is429 = errorStatusCode === 429 || err.message.includes("429") || err.message.includes("RESOURCE_EXHAUSTED");
+        // Handle standard text response extraction and parsing
+        const emotionRegex = /\[emotion:\s*(.*?)\]/i;
+        const emotionMatch = rawAiResponse.match(emotionRegex);
+        
+        if (emotionMatch) {
+            rawAiResponse = rawAiResponse.replace(emotionRegex, "").trim();
+        }
 
-    if (is429 && assignedKey) {
-        // Log timestamp signature into the tracking cache layer to pause selection cycles
-        invalidKeys.set(assignedKey, Date.now());
-        return { success: false, errorType: "429" };
+        return rawAiResponse;
+
+    } catch (err) {
+        console.error("AI Generation Core Service Engine Exception:", err.message);
+
+        const errorStatusCode = err.status || err.statusCode || (err.response ? err.response.status : null);
+        const is429 = errorStatusCode === 429 || err.message.includes("429") || err.message.includes("RESOURCE_EXHAUSTED");
+
+        if (is429 && assignedKey) {
+            invalidKeys.set(assignedKey, Date.now());
+            return { success: false, errorType: "429" };
+        }
+
+        return { success: false, errorType: "503" };
     }
-
-    // Return generic error state for 503, timeouts, or network dropouts
-    return { success: false, errorType: "503" };
-}
 }
 
 module.exports = { getAIResponse };

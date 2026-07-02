@@ -2,27 +2,15 @@
 
 
 const { processUserRequest } = require("./botController");
-const { handleImageMessage } = require("./imageController");
-
-// user lookup (used for role-based queue priority)
 const { createOrGet, getById } = require("../models/userModel");
 const { saveGroup } = require("../models/groupsModel");
 const { addMember } = require("../models/groupMembersModel");
 
-// simple in-memory queue (FIFO unless priority overrides it)
 const queue = [];
 let isProcessing = false;
 
-/**
- * bot bootstrap function
- * wires message listener + queue processor
- */
 module.exports = (bot) => {
 
-    /**
-     * queue runner
-     * only allows one message to be processed at a time
-     */
     const runQueue = async () => {
         if (isProcessing || queue.length === 0) return;
 
@@ -32,34 +20,26 @@ module.exports = (bot) => {
         try {
             const retryUser = await processUserRequest(bot, nextUser);
 
-            // if AI pipeline says “try again later”, requeue it
             if (retryUser) {
-                // too many failures → cool down before retrying
                 if (retryUser.retries >= 2) {
                     setTimeout(() => {
                         queue.push(retryUser);
                         runQueue();
                     }, 10 * 60 * 1000);
                 } else {
-                    // quick retry, no cooldown
                     queue.push(retryUser);
                 }
             }
         } catch (err) {
             console.error("Queue Task Error:", err);
         } finally {
-            // small breathing room between messages
             setTimeout(() => {
                 isProcessing = false;
                 runQueue();
-            }, 3000);
+            }, 5000);
         }
     };
 
-    /**
-     * main telegram message handler
-     * filters noise, builds request object, pushes into queue
-     */
     bot.on("message", async (msg) => {
         try {
             const chatId = msg.chat.id;
@@ -67,65 +47,56 @@ module.exports = (bot) => {
             const isGroup = chatType !== "private" && chatType !== "channel";
             
             let user = null;
-
- // If they have a username, use it. If not, generate an uncollidable unique string using their ID.
-    const username = msg.from.username 
-        ? msg.from.username 
-        : `tg_user_${msg.from.id}`;
-        
-            // Handle User Lookup Based on Chat Context
+            const username = msg.from.username ? msg.from.username : `tg_user_${msg.from.id}`;
+                
             if (!isGroup) {
-                // Only create/get global user records for private conversations
                 user = await createOrGet(chatId, username, msg.from.first_name);
             } else {
-                // For groups, look up the sender's existing profile by their actual sender ID (if it exists)
-                // This prevents registering a group ID inside the user table
                 user = await getById(msg.from.id);
             }
-                    // Stop processing if the account is currently marked as banned
-                    if (user?.status === "banned") {
-                        return "yeah i'm not supposed be talking to you rn. if you think this is a mistake, type /callad and sort it out.";
-                    }
-
-            // --- MULTIMODAL PHOTOGRAPHIC INTERCEPT BLOCK ---
-            if (msg.photo) {
-                // Outsources evaluation, matching rules, downscaling and responses to isolation layer
-                await handleImageMessage(bot, msg, user);
-                return;
+            
+            if (user?.status === "banned") {
+                return bot.sendMessage(chatId, "yeah i'm not supposed be talking to you rn. if you think this is a mistake, type /callad and sort it out.");
             }
 
-            const userText = msg.text;
+            const userText = msg.text || msg.caption || "";
 
-            // Simple keyword restriction for reserved term usage
             if (userText) {
                 const isUsingKat = /\bkat\b/i.test(userText);
                 if (user?.role === "user" && isUsingKat) {
-                    await bot.sendMessage(
-                        chatId,
-                        "Kat? That's reserved. Try something else 😐"
-                    );
+                    await bot.sendMessage(chatId, "Kat? That's reserved. Try something else 😐");
                     return;
                 }
             }
 
-            // Media & Command Interceptions
             if (msg.sticker) return bot.sendMessage(chatId, "A sticker huh? Try using an emoji instead 🥲");
             if (msg.video) return bot.sendMessage(chatId, "A video? What's it about?");
-            if (msg.voice) return bot.sendMessage(chatId, "Not a phone call kinda person, type it out instead 🙂");
-            if (!msg.text) return;
-            if (msg.text.includes("/")) return;
+            
+            // Intercept voice state tags but allow execution loop processing down the pipeline line
+            if (msg.voice && chatType !== "private") {
+                return bot.sendMessage(chatId, "Not a phone call kinda person, type it out instead 🙂");
+            }
+            
+            // Consolidated evaluation condition to support voice and photo streams alongside standard text strings
+            if (!msg.text && !msg.photo && !msg.voice) return;
+            if (msg.text && msg.text.includes("/")) return;
 
             const pending = {
                 msgId: msg.message_id,
                 chatId,
                 userId: msg.from.id,
                 username: msg.from.first_name,
-                message: msg.text,
+                message: userText,
                 chatType: chatType,
-                retries: 0
+                retries: 0,
+                photo: msg.photo || null,
+                isVoiceMessage: !!msg.voice,          // Boolean state flag check
+                voiceFileId: msg.voice?.file_id || null, // Tracking identification pointer
+                hasTranscribed: false,
+                rawMsg: msg, 
+                user: user   
             };
 
-            // Handle Group Specific Pipelines
             if (isGroup) {
                 if (msg.from.is_bot) return;
 
@@ -137,10 +108,9 @@ module.exports = (bot) => {
                 }
                 
                 const reply = msg.reply_to_message;
-                const text = msg.text.toLowerCase();
+                const text = userText.toLowerCase();
                 const botTag = "@kathill";
 
-                // Map specific user membership data to the separate group management schema
                 const { status } = await bot.getChatMember(chatId, msg.from.id);
                 await addMember(chatId, msg.from.id, status, msg.from.first_name);
 
@@ -156,7 +126,6 @@ module.exports = (bot) => {
                 }
             }
 
-            // Prioritize Queue Insertion
             if (user?.role === "owner" || user?.role === "admin") {
                 queue.unshift(pending);
             } else {
@@ -169,12 +138,9 @@ module.exports = (bot) => {
             console.error("Message handler crashed:", err);
             try {
                 await bot.sendMessage(msg.chat.id, "Sorry, my head's aching, couldn't process that message correctly.");
-            } catch (_) {
-                // ignore secondary failure
-            }
+            } catch (_) {}
         }
     });
 
-    // Handle Telegram polling errors
     bot.on("polling_error", (err) => console.log("Polling Error:", err.message));
 };

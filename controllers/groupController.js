@@ -31,12 +31,10 @@ bot.on('my_chat_member', async(update) => {
             
 }
   
-console.log(update);
   // Check if the bot was kicked/removed
   if (newStatus === 'left' || newStatus === 'kicked') {
     await deleteGroup(chatId);
       await deleteUser(chatId);
-    console.log(`Bot was removed from chat: ${chatId}`);
   }
 });
 
@@ -46,7 +44,7 @@ try {
   await addMember(update.chat.id, update.new_chat_participant.id, 'member', update.new_chat_participant.first_name, new Date());
   await bot.sendMessage(update.chat.id, `Welcome, to my gc ${update.new_chat_participant.first_name},\n\n Reply to this message to continue chat`)
 } catch (e) {
-  console.log("Error adding new chat member:", e.message);
+  console.error("Error adding new chat member:", e.message);
 }
 });
 
@@ -54,7 +52,7 @@ bot.on("left_chat_member", async(update)=>{
 try {
   await removeMembers(update.chat.id, update.left_chat_participant.id);;
 } catch (e) {
-  console.log("Error removing left chat member:", e.message);
+  console.error("Error removing left chat member:", e.message);
   
 }
 })

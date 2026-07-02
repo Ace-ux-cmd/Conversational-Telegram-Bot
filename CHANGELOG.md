@@ -4,6 +4,59 @@ All notable changes to the Conversational Telegram Bot (Katelyn) will be documen
 
 ---
 
+# v2.1.0 - Model Optimization, Voice Support & Architecture Improvements
+
+## Added
+
+### AI Features
+
+* Added Text-to-Speech (TTS) and Speech-to-Text (STT) support using `gemini-3.1-flash-tts-preview`
+* Added owner override command for role switching
+* Split image processing into a dedicated request queue for improved multimodal handling
+
+### Internal Architecture
+
+* Refactored AI response pipeline for improved modularity and maintainability
+* Improved separation between image and text request processing
+
+---
+
+## Changed
+
+### AI Models
+
+* Refactored model routing:
+
+  * Private chats → `gemini-3.1-flash-lite`
+  * Image processing → `gemini-3.1-flash-lite`
+  * Group chats → `gemini-2.5-flash-lite`
+
+### Personality System
+
+* Updated default persona:
+
+  * Introvert → Ambivert
+* Refined personality instructions for more balanced conversational behavior
+
+### Infrastructure
+
+* Fully synchronized activity scheduling with the bot's detected location
+* Reduced `bot_health` database logging frequency:
+
+  * 6 records → 1 record
+* Cleaned up group event handling logic
+
+---
+
+## Fixed
+
+### Stability
+* Added seamless fallback experience during text generation errors
+* Fixed activity synchronization inconsistencies
+* Multiple bug fixes across the request pipeline and internal services
+
+---
+
 # v2.0.0 - PostgreSQL Migration, Multimodal Support & Core Architecture Rewrite
 
 
